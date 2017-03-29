@@ -2,47 +2,41 @@
 * University of Southern Denmark
 * Embedded Programming (EMP)
 *
-* MODULENAME.: main.c
+* MODULENAME.: hardware.h
 *
 * PROJECT....: EQ_ONE
 *
 * DESCRIPTION: 
 *
 * Change Log:
-*****************************************************************************
+******************************************************************************
 * Date    Id    Change
+* YYMMDD
 * --------------------
-* 29. mar. 2017  jorn    Module created.
+* 29. mar. 2017	jorn    Module created.
 *
 *****************************************************************************/
 
-/***************************** Include files *******************************/
-#include "hardware.h"
+#ifndef HARDWARE_H_
+  #define HARDWARE_H_
 
+/***************************** Include files *******************************/
 
 /*****************************    Defines    *******************************/
 
+/********************** External declaration of Variables ******************/
+
 /*****************************   Constants   *******************************/
 
-/*****************************   Variables   *******************************/
+/*************************  Function interfaces ****************************/
 
-/*****************************   Functions   *******************************/
-
-int main( void )
+extern void hardware_init(void);
 /*****************************************************************************
-*   Input    :
-*   Output   :
-*   Function :
+*   Input    : -
+*   Output   : -
+*   Function : Initialize all hardware
 ******************************************************************************/
-{
-  hardware_init();
-  //system_init();
 
-
-  while(1)
-  {
-
-  }
-}
 
 /****************************** End Of Module *******************************/
+#endif /* HARDWARE_H_ */
