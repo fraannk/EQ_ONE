@@ -26,10 +26,10 @@
 /*****************************    Defines    *******************************/
 
 // Use this #define to enable the EMP board
-//#define EMP
+#define EMP
 
 // Switch enumerator to be used on IO
-enum IOState
+enum io_state
 {
   ON,
   OFF
@@ -62,14 +62,14 @@ void pwm_clear_interrupt();
 *   Function : Clear the interrupt flags for the sample_handler()
 ******************************************************************************/
 
-void line_in( enum IOState state );
+void line_in( enum io_state state );
 /*****************************************************************************
 *   Input    : ON / OFF
 *   Output   : -
 *   Function : Turns the line_in on or off
 ******************************************************************************/
 
-void line_out( enum IOState state );
+void line_out( enum io_state state );
 /*****************************************************************************
 *   Input    : ON / OFF
 *   Output   : -

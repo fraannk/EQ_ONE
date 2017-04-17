@@ -34,6 +34,7 @@ static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
 void systick_handler(void);
+void sample_handler(void);
 
 #ifndef HWREG
 #define HWREG(x) (*((volatile uint32_t *)(x)))
@@ -97,9 +98,9 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
     IntDefaultHandler,                      // PWM Fault
-    IntDefaultHandler,                      // PWM Generator 0
+    sample_handler,                      // PWM Generator 0
     IntDefaultHandler,                      // PWM Generator 1
-    IntDefaultHandler,                      // PWM Generator 2
+    sample_handler,                      // PWM Generator 2
     IntDefaultHandler,                      // Quadrature Encoder 0
     IntDefaultHandler,                      // ADC Sequence 0
     IntDefaultHandler,                      // ADC Sequence 1

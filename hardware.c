@@ -1,12 +1,20 @@
 /*****************************************************************************
 * University of Southern Denmark
-* Embedded Programming (EMP)
 *
 * MODULENAME.: hardware.c
 *
 * PROJECT....: EQ_ONE
 *
 * DESCRIPTION: Hardware module for EQ_ONE project
+*              Project Mode
+*                Left-in    PB5 (AIN11)   ADC0
+*                Right-in   PB4 (AIN10)   ADC0
+*                Left-out   PB7 (M0PWM1)  PWM module 0 PWM generator 0
+*                Right-out  PB6 (M0PWM0)  PWM module 0 PWM generator 0
+*
+*              EMP Mode (with #define EMP) for on board audio circuit
+*                in         PE5 (AIN8)    ADC0
+*                out        PE4 (M0PWM4)  PWM module 0 PWM generator 2
 *
 * Change Log:
 *****************************************************************************
@@ -23,6 +31,7 @@
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
 #include "macros.h"
+#include "systick.h"
 
 /*****************************    Defines    *******************************/
 
@@ -49,7 +58,7 @@ void pwm_clear_interrupt()
 #endif
 }
 
-void line_in( enum IOState state )
+void line_in( enum io_state state )
 /*****************************************************************************
 *   Header description
 ******************************************************************************/
@@ -71,7 +80,7 @@ void line_in( enum IOState state )
   }
 }
 
-void line_out( enum IOState state )
+void line_out( enum io_state state )
 /*****************************************************************************
 *   Header description
 ******************************************************************************/
@@ -601,11 +610,54 @@ void init_debug_pins()
   GPIO_PORTB_DEN_R |= ( 1<<0 | 1<<1 | 1<<3 ) ;
 }
 
+void delay_us(INT32U time)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
+{
+  //Make sure Timer2A is stopped
+  bit_clear(TIMER2_CTL_R, TIMER_CTL_TAEN);
+
+  //Set the start value of timer2 A
+  TIMER2_TAILR_R = time * CPU_MULTIPLEX;
+
+  // Start timer2 A
+  //bit_set(TIMER2_CTL_R, TIMER_CTL_TASTALL);  // stall timer2 in debug mode
+  bit_set(TIMER2_CTL_R, TIMER_CTL_TAEN);
+
+  // poll for time-out on timer2 A
+  while(!(TIMER2_RIS_R & TIMER_RIS_TATORIS));
+
+  // clear flag
+  bit_set(TIMER2_ICR_R, TIMER_ICR_TATOCINT);
+}
+
+void delay_init()
+/*****************************************************************************
+*   Header description
+******************************************************************************/
+{
+    // Activate Timer2 Clock
+    SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R2;
+
+    // Disable timer2 A before changing any value
+    bit_clear(TIMER2_CTL_R, TIMER_CTL_TAEN);
+
+    // 32-bit timer for Timer2 A.
+    TIMER2_CFG_R = 0x00;
+
+    // One-Shot Timer mode on Timer2 A
+    TIMER2_TAMR_R = 0x01;
+}
+
 void hardware_init( INT16U sample_freq )
 /*****************************************************************************
 *   Header description
 ******************************************************************************/
 {
+  // disable global interrupt
+  disable_global_int();
+
   // Set processor frequency to max
   set_80Mhz_clock();
 
@@ -631,6 +683,14 @@ void hardware_init( INT16U sample_freq )
   init_ADC();
 
   init_PWM( cycles );
+
+  delay_init();
+
+  systick_init();
+
+  // Enable global interrupt
+  enable_global_int();
+
 }
 
 /****************************** End Of Module *******************************/

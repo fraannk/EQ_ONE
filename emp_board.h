@@ -1,53 +1,64 @@
 /*****************************************************************************
 * University of Southern Denmark
+* Embedded C Programming (ECP)
 *
-* MODULENAME.: systick.c
+* MODULENAME.: emp_board.h
 *
-* PROJECT....: EQ_ONE
+* PROJECT....: EMP
 *
-* DESCRIPTION: Scheduler module for the EQ_ONE system
+* DESCRIPTION: Generel EMP files
 *
 * Change Log:
-*****************************************************************************
+******************************************************************************
 * Date    Id    Change
+* YYMMDD
 * --------------------
-* 16. apr. 2017  jorn    Module adopted from MOH systick
+* 170210  JJA   Module created.
 *
 *****************************************************************************/
 
-#ifndef _EMP_H
-  #define _EMP_H
+#ifndef EMP_BOARD_
+#define EMP_BOARD_
 
 /***************************** Include files *******************************/
 
 /*****************************    Defines    *******************************/
 
+#define LED_RED         0b100
+#define LED_YELLOW      0b010
+#define LED_GREEN       0b001
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Functions   *******************************/
-void enable_global_int();
+void emp_set_led(INT8U led);
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Enable global interrupt.
+*   Input    : INT8U : LED_RED | LED_YELLOW | LED_GREEN
+*   Output   : void
+*   Function : Set the selected LED combination on the EMP board
 ******************************************************************************/
 
-void disable_global_int();
+void emp_toggle_status_led();
 /*****************************************************************************
 *   Input    : -
-*   Output   : -
-*   Function : Disable global interrupt.
+*   Output   : void
+*   Function : Toggle the EMP board status LED
 ******************************************************************************/
 
-void init_systick();
+void emp_clear_all_led(void);
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Initialize the systick interrupt.
+*   Input    : void
+*   Output   : void
+*   Function : Clears all LEDs on the EMP board
+******************************************************************************/
+
+void emp_toggle_led(INT8U led);
+/*****************************************************************************
+*   Input    : INT8U : LED_RED | LED_YELLOW | LED_GREEN
+*   Output   : void
+*   Function : Toggle the selected LED combination on the EMP board
 ******************************************************************************/
 
 
 /****************************** End Of Module *******************************/
 #endif
-
-

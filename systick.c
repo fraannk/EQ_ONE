@@ -1,28 +1,42 @@
+/*****************************************************************************
+* University of Southern Denmark
+*
+* MODULENAME.: systick.c
+*
+* PROJECT....: EQ_ONE
+*
+* DESCRIPTION: Scheduler module for the EQ_ONE system
+*
+* Change Log:
+*****************************************************************************
+* Date    Id    Change
+* --------------------
+* 16. apr. 2017  jorn    Module adopted from MOH systick
+*
+*****************************************************************************/
+
+/***************************** Include files *******************************/
 #include <stdint.h>
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
+#include "global.h"
 
-
-
-#define SYSTICK_RELOAD_VALUE 5000              // 5 mS
+/*****************************    Defines    *******************************/
 
 // Missing definitions in tm4c123gh6pm.h file
 #define NVIC_INT_CTRL_PEND_SYST   0x04000000    // Pend a systick int
 #define NVIC_INT_CTRL_UNPEND_SYST 0x02000000    // Unpend a systick int
-
 #define SYSTICK_PRIORITY    0x7E
 
+/*****************************   Variables   *******************************/
 volatile INT16S ticks = 0;
 
+/*****************************   Functions   *******************************/
 void systick_handler()
-/*****************************************************************************
-*   Function : See module specification (.h-file).
-*****************************************************************************/
 {
   // Hardware clears systick int reguest
   ticks++;
 }
-
 
 void enable_global_int()
 {
@@ -36,16 +50,17 @@ void disable_global_int()
   __asm("cpsid i");
 }
 
-void init_systick()
+void systick_init( )
 {
+  INT32U systick_reload_value = ( CPU_F / 1000 ) * MS_PER_TICK;
 
   // Disable systick timer
   NVIC_ST_CTRL_R &= ~(NVIC_ST_CTRL_ENABLE);
 
   // Set current systick counter to reload value
-  NVIC_ST_CURRENT_R = SYSTICK_RELOAD_VALUE;
+  NVIC_ST_CURRENT_R = systick_reload_value;
   // Set Reload value, Systick reload register
-  NVIC_ST_RELOAD_R = SYSTICK_RELOAD_VALUE;
+  NVIC_ST_RELOAD_R = systick_reload_value;
 
   // NVIC systick setup, vector number 15
   // Clear pending systick interrupt request
@@ -65,3 +80,4 @@ void init_systick()
   NVIC_ST_CTRL_R |= NVIC_ST_CTRL_ENABLE;
 }
 
+/****************************** End Of Module *******************************/

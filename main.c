@@ -19,39 +19,56 @@
 /***************************** Include files *******************************/
 #include <stdint.h>
 #include "hardware.h"
-#include "tm4c123gh6pm.h"
-#include "systick.h"
 #include "emp_type.h"
+#include "emp_board.h"
+#include "scheduler.h"
+#include "debug.h"
+#include "emp_lcd1602.h"
+#include "global.h"
+#include "uart.h"
+#include "equalizer.h"
 
 /*****************************    Defines    *******************************/
 
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-extern INT16U ticks;
 
 /*****************************   Functions   *******************************/
 
+void i_am_alive( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data )
+{
+  emp_toggle_status_led();
+  task_set_state( my_state ? 0 : 1 );
+  task_wait( 250 );
+}
+
 int main( void )
 /*****************************************************************************
-*   Input    :
-*   Output   :
-*   Function :
+*   Input    : -
+*   Output   : -
+*   Function : Default main entry point
 ******************************************************************************/
 {
-  hardware_init();
-  //system_init();
-  init_systick();
+  // Initialize hardware
+  hardware_init( SAMPLE_RATE );
 
-  while(1)
-  {
-    if( ticks)
-    {
-      ticks--;
+  // Initialize drivers
+  lcd_init();
+  uart0_init(UART_BAUDRATE, UART_DATABITS, UART_STOPBITS, UART_PARITY);
 
-      GPIO_PORTB_DATA_R ^= 0x01;
-    }
-  }
+  // Default EMP setup
+  emp_set_led(0);
+
+  // Initialize equalizer
+  equalizer_init();
+
+  // Initialize and run the scheduler
+  scheduler_init();
+  task_start(TP_LOW, i_am_alive);
+  scheduler();
+
+  return(0);
 }
 
 /****************************** End Of Module *******************************/
