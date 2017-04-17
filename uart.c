@@ -19,14 +19,57 @@
 #include <stdint.h>
 #include "emp_type.h"
 #include "tm4c123gh6pm.h"
+#include "scheduler.h"
+#include "global.h"
+#include "buffers.h"
 
 /*****************************    Defines    *******************************/
 
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
+static INT8U tx_buffer_id;
+static INT8U rx_buffer_id;
 
 /*****************************   Functions   *******************************/
+
+BOOLEAN uart0_rx_rdy()
+{
+  return( UART0_FR_R & UART_FR_RXFF );
+}
+
+INT8U uart0_getc()
+{
+  return ( UART0_DR_R );
+}
+
+BOOLEAN uart0_tx_rdy()
+{
+  return( UART0_FR_R & UART_FR_TXFE );
+}
+
+void uart0_putc( INT8U ch )
+{
+  UART0_DR_R = ch;
+}
+
+void uart0_rx_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+{
+  if(uart0_rx_rdy())
+  {
+    buffer_put(rx_buffer_id, uart0_getc());
+  }
+}
+
+void uart0_tx_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+{
+  if( uart0_tx_rdy() && !buffer_is_empty(tx_buffer_id) )
+  {
+    INT8U data;
+    if( buffer_get(tx_buffer_id, &data) )
+      uart0_putc( data );
+  }
+}
 
 INT32U lcrh_databits( INT8U antal_databits )
 /*****************************************************************************
@@ -119,8 +162,6 @@ void uart0_fifos_disable()
 
 void uart0_init( INT32U baud_rate, INT8U databits, INT8U stopbits, INT8U parity )
 {
-  INT32U BRD;
-
   // Initialize UART0
 
   // Enable clock for port A
@@ -137,10 +178,13 @@ void uart0_init( INT32U baud_rate, INT8U databits, INT8U stopbits, INT8U parity 
   GPIO_PORTA_PUR_R   |= 0x00000002;
 
   // Calculate UART baudrate
-  // TODO: Documents this
-  BRD = 64000000 / baud_rate;
-  UART0_IBRD_R = BRD / 64;
-  UART0_FBRD_R = BRD & 0x0000003F;
+  // TODO: Documents and fix this, recalc to 80MHz
+  //INT64U BRD = (INT64U)((CPU_F << 6) / baud_rate);
+  //UART0_IBRD_R = (INT32U)(BRD >> 6);
+  //UART0_FBRD_R = (INT32U)(BRD & 0x0000003F);
+  UART0_IBRD_R = 260;
+  UART0_FBRD_R = 27;
+
 
   // Setup UART
   // TODO: Fix this
@@ -151,6 +195,10 @@ void uart0_init( INT32U baud_rate, INT8U databits, INT8U stopbits, INT8U parity 
   uart0_fifos_disable();
 
   UART0_CTL_R  |= (UART_CTL_UARTEN | UART_CTL_TXE );  // Enable UART
+
+  // Create buffers for tx and rx
+  tx_buffer_id = buffer_create(512);
+  rx_buffer_id = buffer_create(128);
 }
 
 /****************************** End Of Module *******************************/

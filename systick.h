@@ -39,7 +39,7 @@ void disable_global_int();
 *   Function : Disable global interrupt.
 ******************************************************************************/
 
-void init_systick();
+void systick_init();
 /*****************************************************************************
 *   Input    : -
 *   Output   : -

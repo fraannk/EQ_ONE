@@ -59,6 +59,7 @@ INT8U task_get_priority_ticks(TASK_PRIORITY priority )
     case TP_LOW:    ticks = TASK_LOW_PRIO_TICKS; break;
     case TP_MEDIUM: ticks = TASK_MED_PRIO_TICKS; break;
     case TP_HIGH:   ticks = TASK_HIGH_PRIO_TICKS; break;
+    default:   ticks = TASK_LOW_PRIO_TICKS;
   }
 
   return( ticks );

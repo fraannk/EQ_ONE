@@ -1,11 +1,12 @@
 /*****************************************************************************
 * University of Southern Denmark
+* Embedded Programming (EMP)
 *
-* MODULENAME.: uart.h
+* MODULENAME.: buffers.h
 *
 * PROJECT....: EQ_ONE
 *
-* DESCRIPTION: Module for the UART driver
+* DESCRIPTION: 
 *
 * Change Log:
 ******************************************************************************
@@ -16,27 +17,23 @@
 *
 *****************************************************************************/
 
-#ifndef UART_H_
-  #define UART_H_
+#ifndef BUFFERS_H_
+  #define BUFFERS_H_
 
 /***************************** Include files *******************************/
 
 /*****************************    Defines    *******************************/
-
+#define     BUFFERS_MAX         16
 /********************** External declaration of Variables ******************/
 
 /*****************************   Constants   *******************************/
 
 /*************************  Function interfaces ****************************/
 
-void uart0_init( INT32U baud_rate,
-                 INT8U databits,
-                 INT8U stopbits,
-                 INT8U parity );
-
-void uart0_rx_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
-
-void uart0_tx_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
+INT8S buffer_create(INT16U size);
+INT8U buffer_get(INT8U id, INT8U *data);
+INT8U buffer_put(INT8U id, INT8U data);
+INT8U buffer_is_empty(INT8U id);
 
 /****************************** End Of Module *******************************/
-#endif /* UART_H_ */
+#endif /* BUFFERS_H_ */

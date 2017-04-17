@@ -36,7 +36,7 @@
 
 /*****************************   Functions   *******************************/
 
-void i_am_alive( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data )
+void status( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data )
 {
   emp_toggle_status_led();
   task_set_state( my_state ? 0 : 1 );
@@ -65,7 +65,9 @@ int main( void )
 
   // Initialize and run the scheduler
   scheduler_init();
-  task_start(TP_LOW, i_am_alive);
+  task_start(TP_LOW, status);
+  task_start(TP_HIGH, uart0_rx_task);
+  task_start(TP_HIGH, uart0_tx_task);
   scheduler();
 
   return(0);
