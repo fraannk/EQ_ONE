@@ -89,7 +89,7 @@ INT8S buffer_create(INT16U size)
 {
   INT8U id = buffer_newid();
 
-  if(id > 0)
+  if(id >= 0)
   {
     INT8U *data = (INT8U*)malloc(size);
     buffers[id].data = data;

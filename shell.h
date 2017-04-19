@@ -1,42 +1,28 @@
 /*****************************************************************************
 * University of Southern Denmark
+* Embedded Programming (EMP)
 *
-* MODULENAME.: global.h
+* MODULENAME.: shell.h
 *
 * PROJECT....: EQ_ONE
 *
-* DESCRIPTION: Global definition file
+* DESCRIPTION: 
 *
 * Change Log:
 ******************************************************************************
 * Date    Id    Change
 * YYMMDD
 * --------------------
-* 3. apr. 2017	jorn    Module created.
+* 18. apr. 2017	jorn    Module created.
 *
 *****************************************************************************/
 
-#ifndef GLOBAL_H_
-  #define GLOBAL_H_
+#ifndef SHELL_H_
+  #define SHELL_H_
 
 /***************************** Include files *******************************/
 
 /*****************************    Defines    *******************************/
-#define CPU_F                 80000000
-#define MS_PER_TICK           1             // Millisec per Ticks
-#define CPU_MULTIPLEX         80            // CPU cycles per microsec
-
-
-#define SAMPLE_RATE           44100
-
-#define UART_BAUDRATE         19200
-#define UART_DATABITS         8
-#define UART_STOPBITS         1
-#define UART_PARITY           'n'
-
-// Files
-#define   COM1                0         // UART
-
 
 /********************** External declaration of Variables ******************/
 
@@ -44,5 +30,7 @@
 
 /*************************  Function interfaces ****************************/
 
+void shell( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data );
+
 /****************************** End Of Module *******************************/
-#endif /* GLOBAL_H_ */
+#endif /* SHELL_H_ */

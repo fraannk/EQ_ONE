@@ -27,6 +27,9 @@
 #include "global.h"
 #include "uart.h"
 #include "equalizer.h"
+#include "file.h"
+#include "string.h"
+#include "shell.h"
 
 /*****************************    Defines    *******************************/
 
@@ -41,6 +44,15 @@ void status( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data )
   emp_toggle_status_led();
   task_set_state( my_state ? 0 : 1 );
   task_wait( 250 );
+}
+
+void echo( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data )
+{
+  INT8U ch=0;
+  if(file_read(COM1, &ch))
+  {
+    task_status(COM1);
+  }
 }
 
 int main( void )
@@ -60,14 +72,19 @@ int main( void )
   // Default EMP setup
   emp_set_led(0);
 
+  // Initialize filesystem
+  files_init();
+
   // Initialize equalizer
   equalizer_init();
 
   // Initialize and run the scheduler
   scheduler_init();
-  task_start(TP_LOW, status);
-  task_start(TP_HIGH, uart0_rx_task);
-  task_start(TP_HIGH, uart0_tx_task);
+  task_start("Status", TP_LOW, status);
+  task_start("Echo", TP_HIGH, echo);
+  task_start("UART_RX", TP_HIGH, uart0_rx_task);
+  task_start("UART_TX", TP_HIGH, uart0_tx_task);
+  task_start("Shell", TP_MEDIUM, shell);
   scheduler();
 
   return(0);

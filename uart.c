@@ -71,6 +71,17 @@ void uart0_tx_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
   }
 }
 
+BOOLEAN uart_write( INT8U ch )
+{
+
+  return( buffer_put( tx_buffer_id , ch ));
+}
+
+BOOLEAN uart_read( INT8U *pch )
+{
+  return( buffer_get( rx_buffer_id, pch ));
+}
+
 INT32U lcrh_databits( INT8U antal_databits )
 /*****************************************************************************
 *   Input    :
@@ -197,8 +208,9 @@ void uart0_init( INT32U baud_rate, INT8U databits, INT8U stopbits, INT8U parity 
   UART0_CTL_R  |= (UART_CTL_UARTEN | UART_CTL_TXE );  // Enable UART
 
   // Create buffers for tx and rx
-  tx_buffer_id = buffer_create(512);
-  rx_buffer_id = buffer_create(128);
+  tx_buffer_id = buffer_create(1024);
+  rx_buffer_id = buffer_create(250);
+
 }
 
 /****************************** End Of Module *******************************/

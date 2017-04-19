@@ -22,12 +22,16 @@
 #include "emp_type.h"
 #include "debug.h"
 
+#include "string.h"
+#include "file.h"
+#include "global.h"
+
 /*****************************    Defines    *******************************/
 typedef struct
 {
   TASK_CONDITION  condition;
   INT8U           id;
-  INT8U           name[16];
+  const char      *name;
   INT8U           state;
   TASK_EVENT      event;
   INT8U           sem;
@@ -35,6 +39,8 @@ typedef struct
   INT16U          timer;
   INT8U           ticks;
   void            (*task)(INT8U, INT8U, TASK_EVENT, INT8U);
+  INT32U          runtime_min;
+  INT32U          runtime_max;
 } tcb;
 
 /*****************************   Constants   *******************************/
@@ -65,17 +71,21 @@ INT8U task_get_priority_ticks(TASK_PRIORITY priority )
   return( ticks );
 }
 
-void task_start(TASK_PRIORITY priority ,
+void task_start(char *name,
+                TASK_PRIORITY priority ,
                 void (*task)(INT8U, INT8U, TASK_EVENT, INT8U))
 {
   INT8U id = task_new_id();
   task_pool[id].condition = TC_IDLE;
   task_pool[id].priority = priority;
+  task_pool[id].name = name;
   task_pool[id].task = task;
   task_pool[id].ticks = task_get_priority_ticks(priority);
   task_pool[id].sem = 0;
   task_pool[id].state = 0;
   task_pool[id].timer = 0;
+  task_pool[id].runtime_min = ~0;
+  task_pool[id].runtime_max = 0;
 }
 
 void scheduler_init()
@@ -84,12 +94,15 @@ void scheduler_init()
   {
     task_pool[i].condition = TC_STOPPED;
     task_pool[i].event = TE_NOEVENT;
+    task_pool[i].name = "\n";
     task_pool[i].id = i;
     task_pool[i].sem = 0;
     task_pool[i].state = 0;
     task_pool[i].timer = 0;
     task_pool[i].ticks = 0;
     task_pool[i].priority = TP_LOW;
+    task_pool[i].runtime_min = ~0;
+    task_pool[i].runtime_max = 0;
   }
 }
 
@@ -102,6 +115,63 @@ void task_wait(INT16U millisec)
 void task_set_state(INT8U state)
 {
   (*current_task).state = state;
+}
+
+
+// TODO: This function should not be located here
+void task_status( FILE file_handler )
+{
+  gfprintf(file_handler, "\r\nProcess status\r\n\r\n");
+  file_write(file_handler, 0x1B);
+  file_write(file_handler, 0x5B);
+  file_write(file_handler, 33);
+  file_write(file_handler, "m");
+
+  gfprintf(file_handler, "ID Max     Min     Condition Priority Name\r\n");
+  for(INT8U i = 0 ; i < TASK_POOL_MAX; i++)
+  {
+    if(task_pool[i].condition != TC_STOPPED)
+    {
+
+      gfprintf(file_handler, "%02d %7d %7d ",
+               task_pool[i].id,
+               task_pool[i].runtime_max,
+               task_pool[i].runtime_min);
+      switch (task_pool[i].condition)
+      {
+        case TC_IDLE:
+          gfprintf(file_handler, "IDLE      ");
+          break;
+        case TC_READY:
+          gfprintf(file_handler, "READY     ");
+          break;
+        case TC_RUNNING:
+          gfprintf(file_handler, "RUNNING   ");
+          break;
+        case TC_STOPPED:
+          gfprintf(file_handler, "STOPPED   ");
+          break;
+        case TC_WAIT:
+          gfprintf(file_handler, "WAIT      ");
+          break;
+      }
+      switch (task_pool[i].priority)
+           {
+             case TP_LOW:
+               gfprintf(file_handler, "LOW      ");
+               break;
+             case TP_MEDIUM:
+               gfprintf(file_handler, "MEDIUM   ");
+               break;
+             case TP_HIGH:
+               gfprintf(file_handler, "HIGH     ");
+               break;
+           }
+      gfprintf(file_handler, "%s", task_pool[i].name);
+      gfprintf(file_handler, "\r\n");
+    }
+  }
+  gfprintf(file_handler, "\r\n");
 }
 
 void scheduler()
@@ -143,10 +213,16 @@ void scheduler()
         if( (*current_task).condition == TC_READY )
         {
           (*current_task).condition = TC_RUNNING;
+          timer_set(0);
           (*current_task).task( (*current_task).id,
                                 (*current_task).state,
                                 (*current_task).event,
                                 0);
+          INT32U runtime = timer_get();
+          if ( (*current_task).runtime_min > runtime )
+            (*current_task).runtime_min = runtime;
+          if ( (*current_task).runtime_max < runtime )
+            (*current_task).runtime_max = runtime;
           if( (*current_task).condition == TC_RUNNING )
             (*current_task).condition = TC_IDLE;
         }

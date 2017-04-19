@@ -55,8 +55,7 @@ typedef enum{
 
 /*************************  Function interfaces ****************************/
 
-void task_start(TASK_PRIORITY priority ,
-                void (*task)(INT8U, INT8U, TASK_EVENT, INT8U));
+void task_start(char *name, TASK_PRIORITY priority , void (*task)(INT8U, INT8U, TASK_EVENT, INT8U));
 
 void task_wait(INT16U millisec);
 

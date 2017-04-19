@@ -47,6 +47,10 @@ typedef struct {
 
 /*************************  Function interfaces ****************************/
 
+void timer_set(INT32U time );
+
+INT32U timer_get();
+
 void hardware_init( INT16U sample_freq );
 /*****************************************************************************
 *   Input    : The sample frequency

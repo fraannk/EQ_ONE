@@ -650,6 +650,37 @@ void delay_init()
     TIMER2_TAMR_R = 0x01;
 }
 
+void timer_init()
+{
+  // Activate Timer4 Clock
+  SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R4;
+
+  // Disable timer4 A before changing any value
+  bit_clear(TIMER4_CTL_R, TIMER_CTL_TAEN);
+
+  // 32-bit timer for Timer4 A.
+  TIMER4_CFG_R = 0x00;
+
+  // Enable stall in debug mode
+  bit_set(TIMER4_CTL_R, TIMER_CTL_TASTALL);
+
+  // One-Shot Timer mode on Timer4 A
+  TIMER4_TAMR_R =  (TIMER_TAMR_TACDIR | TIMER_TAMR_TAMR_PERIOD) ;
+
+  bit_set(TIMER4_CTL_R, TIMER_CTL_TAEN);
+}
+
+void timer_set(INT32U time )
+{
+  TIMER4_TAV_R = time;
+
+}
+
+INT32U timer_get()
+{
+  return (TIMER4_TAR_R);
+}
+
 void hardware_init( INT16U sample_freq )
 /*****************************************************************************
 *   Header description
@@ -685,6 +716,8 @@ void hardware_init( INT16U sample_freq )
   init_PWM( cycles );
 
   delay_init();
+
+  timer_init();
 
   systick_init();
 
