@@ -22,8 +22,8 @@
 #include "emp_type.h"
 #include "debug.h"
 
-#include "string.h"
 #include "file.h"
+#include "gfstring.h"
 #include "global.h"
 
 /*****************************    Defines    *******************************/

@@ -28,7 +28,7 @@
 #include "uart.h"
 #include "equalizer.h"
 #include "file.h"
-#include "string.h"
+#include "gfstring.h"
 #include "shell.h"
 
 /*****************************    Defines    *******************************/

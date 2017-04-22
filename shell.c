@@ -21,10 +21,11 @@
 #include "scheduler.h"
 #include "file.h"
 #include "uart.h"
-#include "string.h"
 #include "scheduler.h"
 #include "global.h"
 #include "equalizer.h"
+#include "gfstring.h"
+#include "string.h"
 
 
 /*****************************    Defines    *******************************/
@@ -35,15 +36,11 @@ typedef enum{
   EXECUTE
 }SHELL_STATE;
 
-
-
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
-
-
 void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
   static char cmd_line[127];
