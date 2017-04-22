@@ -16,12 +16,7 @@
 *****************************************************************************/
 
 /***************************** Include files *******************************/
-#include <stdint.h>
-#include "emp_type.h"
-#include "tm4c123gh6pm.h"
-#include "scheduler.h"
-#include "global.h"
-#include "buffers.h"
+#include "uart.h"
 
 /*****************************    Defines    *******************************/
 

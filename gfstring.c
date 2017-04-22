@@ -137,7 +137,7 @@ int  Size;
   }
 }
 
-const void gfprintf( FILE fp, const char *Str, ...)
+void gfprintf( FILE fp, const char *Str, ...)
 {
   unsigned long Val;
   int i, Done, Size, Len, Sign, Adjust;
@@ -259,7 +259,7 @@ const void gfprintf( FILE fp, const char *Str, ...)
   va_end(vaArgP);
 }
 
-const void gprintf( const char *Str, ...)
+void gprintf( const char *Str, ...)
 {
   va_list vaArgP;
 

@@ -16,12 +16,13 @@
 *****************************************************************************/
 
 /***************************** Include files *******************************/
+#include "dsp.h"
 #include <stdint.h>
 #include <math.h>
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
 #include "global.h"
-#include "dsp.h"
+
 
 /*****************************    Defines    *******************************/
 #define IIR_DENOM_LENGTH    2
@@ -46,7 +47,7 @@
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-
+INT8U   bands;
 
 
 
@@ -64,6 +65,7 @@ void iir_init_dsp_states()
   }
 
 }
+
 FP32 iir_filter_sos(FP32 in,            /* input sample */
                     FP32 *a,            /* a coefficients */
                     FP32 *b,            /* b coefficients */
@@ -81,24 +83,22 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
     return out;
 }
 
-FP32 iir_filter_cascade(INT8U K_in,     /* number of bands*/
-                        FP32 A[K_MAX][3],       /* A coefficient matrix */
-                        FP32 B[K_MAX][3],       /* B coefficient matrix*/
-                        FP32 W[K_MAX][3],       /* State matrix*/
-                        FP32 in)        /* input sample */
+FP32 iir_filter_cascade(INT8U band,         /* number of bands*/
+                        FP32 A[K_MAX][3],   /* A coefficient matrix */
+                        FP32 B[K_MAX][3],   /* B coefficient matrix*/
+                        FP32 W[K_MAX][3],   /* State matrix*/
+                        FP32 in)            /* input sample */
 {
     INT8U i;
     FP32 out;
 
     out = in;
 
-    for(i = 0; i < K_in; i++)
+    for(i = 0; i < band; i++)
         out = iir_filter_sos(out,A[i],B[i],W[i]);
 
     return out;
 }
-
-
 
 void iir_calc_coef_peak(FP32 *a,FP32 *b,FP32 *param)
 {
@@ -155,6 +155,7 @@ void iir_set_param(FP32 Q,FP32 G,FP32 f_0,INT8U filter_type,param param)
   param.param_arr[1] = G;
   param.param_arr[2] = f_0;
 }
+
 void iir_get_param(FP32 *Q,FP32 *G,FP32 *f_0,INT8U *filter_type, param param)
 {
   *filter_type = param.filter_type;
@@ -180,9 +181,7 @@ void iir_calc_coef(FP32 *a,FP32 *b,param param)
         case IIR_LS:
             iir_calc_coef_ls(a,b,param.param_arr);
         break;
-
     }
-
 }
 
 
@@ -192,7 +191,7 @@ void iir_demo_eq()
   FP32 f_0[] =    {   500,    1500,       2500,     5000,     8000    };
   FP32  G[] =     {   -3,     5,          -5,       3,        10      };
   INT8U types[] = {   IIR_HS, IIR_PEAK, IIR_NOTCH,  IIR_PEAK, IIR_LS  };
-  INT8U bands = 5;
+  bands = 5;
   iir_init_dsp_states();
  // fill parameters struct
   for(INT8U i=0; i < bands; i++)
@@ -206,8 +205,6 @@ void iir_demo_eq()
   {
       iir_calc_coef(A[i],B[i],parameters[i]);
   }
-
-
 
   for(INT8U i=0; i < BUFF_SIZE;i++)
     out[i] = iir_filter_cascade(bands, A, B, W, in[i]);

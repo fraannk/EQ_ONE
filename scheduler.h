@@ -68,6 +68,8 @@ void scheduler_init();
 
 void task_status( FILE file_handler );
 
+void task_event( INT8U event );
+
 void scheduler();
 /*****************************************************************************
 *   Input    : -

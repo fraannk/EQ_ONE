@@ -22,17 +22,21 @@
 #define DSP_H_
 
 /***************************** Include files *******************************/
+#include "emp_type.h"
 
 /*****************************    Defines    *******************************/
-#define BUFF_SIZE 100
-#define K_MAX 8
-
+#define BUFF_SIZE     100
+#define K_MAX         8
+#define BAND_MAX      10
 
 /********************** External declaration of Variables ******************/
 
 FP32 in[BUFF_SIZE]; // input buffer
 FP32 out[BUFF_SIZE]; // output buffer
-FP32  A[K_MAX][3], B[K_MAX][3], W[K_MAX][3];
+FP32  A[K_MAX][3],
+      B[K_MAX][3],
+      W[K_MAX][3];
+
 
 typedef struct {
 FP32 param_arr[3];

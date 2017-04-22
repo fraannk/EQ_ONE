@@ -17,8 +17,8 @@
 *****************************************************************************/
 
 /***************************** Include files *******************************/
-#include <stdint.h>
 #include "equalizer.h"
+#include <stdint.h>
 #include "global.h"
 #include "debug.h"
 #include "hardware.h"
@@ -34,9 +34,6 @@ INT8U   sample_count = 64;
 INT32U  sample_sum = 0;
 
 INT8U   eq_on = 0;
-
-FP32 W_L[3];
-FP32 W_R[3];
 
 /*****************************   Functions   *******************************/
 extern void sample_handler()
@@ -55,8 +52,11 @@ extern void sample_handler()
     FP32 left_ch = (FP32)(sample.left-2048);
     FP32 right_ch = (FP32)(sample.right-2048);
 
-    FP32 left =  iir_filter_sos(left_ch, a, b, W_L);
-    FP32 right = iir_filter_sos(right_ch, a, b, W_R);
+    //FP32 left =  iir_filter_sos(left_ch, a, b, W_L);
+    //FP32 right = iir_filter_sos(right_ch, a, b, W_R);
+
+    FP32 left =  iir_filter_cascade(5, A, B, W, left_ch);
+    FP32 right = iir_filter_cascade(5, A, B, W, right_ch);
 
     sample.left = (INT16U)(left+2048);
     sample.right = (INT16U)(right+2048);
@@ -104,7 +104,8 @@ void equalizer_init()
   line_in( ON );
   line_out( ON );
 
-  iir_set_coefficients(a, b);
+  //iir_init_dsp_states();
+  iir_demo_eq();
 }
 
 /****************************** End Of Module *******************************/

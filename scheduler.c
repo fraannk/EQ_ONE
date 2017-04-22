@@ -17,11 +17,11 @@
 *****************************************************************************/
 
 /***************************** Include files *******************************/
-#include <stdint.h>
 #include "scheduler.h"
+#include <stdint.h>
 #include "emp_type.h"
 #include "debug.h"
-
+#include "hardware.h"
 #include "file.h"
 #include "gfstring.h"
 #include "global.h"
@@ -118,9 +118,14 @@ void task_set_state(INT8U state)
   (*current_task).state = state;
 }
 
+void task_event( INT8U event )
+{
+  current_task->event = event;
+}
+
 void task_clear_event()
 {
-  (*current_task).event = TE_NOEVENT;
+  current_task->event = TE_NOEVENT;
 }
 
 
@@ -128,12 +133,11 @@ void task_clear_event()
 void task_status( FILE file_handler )
 {
   gfprintf(file_handler, "\r\nProcess status\r\n\r\n");
-  file_write(file_handler, 0x1B);
-  file_write(file_handler, 0x5B);
-  file_write(file_handler, 33);
-  file_write(file_handler, "m");
 
-  gfprintf(file_handler, "ID Max     Min     Condition Priority Name\r\n");
+  gfprintf(file_handler, "\x1B[1m");
+  gfprintf(file_handler, "ID Max     Min     Condition Priority State Name\r\n");
+  gfprintf(file_handler, "\x1B[0m");
+
   for(INT8U i = 0 ; i < TASK_POOL_MAX; i++)
   {
     if(task_pool[i].condition != TC_STOPPED)
@@ -164,15 +168,16 @@ void task_status( FILE file_handler )
       switch (task_pool[i].priority)
            {
              case TP_LOW:
-               gfprintf(file_handler, "LOW      ");
+               gfprintf(file_handler, "\x1B[32mLOW      \x1B[0m");
                break;
              case TP_MEDIUM:
-               gfprintf(file_handler, "MEDIUM   ");
+               gfprintf(file_handler, "\x1B[33mMEDIUM   \x1B[0m");
                break;
              case TP_HIGH:
-               gfprintf(file_handler, "HIGH     ");
+               gfprintf(file_handler, "\x1B[31mHIGH     \x1B[0m");
                break;
            }
+      gfprintf(file_handler, "%5d ", task_pool[i].state);
       gfprintf(file_handler, "%s", task_pool[i].name);
       gfprintf(file_handler, "\r\n");
     }

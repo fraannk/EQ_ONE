@@ -18,10 +18,10 @@
 *****************************************************************************/
 
 /***************************** Include files *******************************/
+#include "file.h"
 #include <stdint.h>
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
-#include "file.h"
 #include "uart.h"
 #include "global.h"
 

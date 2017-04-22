@@ -16,8 +16,9 @@
 *****************************************************************************/
 
 /***************************** Include files *******************************/
-#include <stdint.h>
 #include "debug.h"
+#include <stdint.h>
+#include "tm4c123gh6pm.h"
 #include "hardware.h"
 #include "emp_type.h"
 

@@ -38,6 +38,10 @@
 #define   COM1                0         // UART
 
 
+#define   VERSION_MAJOR       0
+#define   VERSION_MINOR       1
+
+
 /********************** External declaration of Variables ******************/
 
 /*****************************   Constants   *******************************/

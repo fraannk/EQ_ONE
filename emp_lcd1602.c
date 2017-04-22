@@ -18,12 +18,13 @@
 *****************************************************************************/
 
 /***************************** Include files *******************************/
+#include "emp_lcd1602.h"
 #include <stdint.h>
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
 #include "hardware.h"
 #include "macros.h"
-#include "emp_lcd1602.h"
+
 
 /*****************************    Defines    *******************************/
 #define     LCD_DATA_PORT           GPIO_PORTC_DATA_R
