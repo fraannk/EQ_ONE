@@ -29,6 +29,7 @@
 
 /*************************  Function interfaces ****************************/
 void equalizer_init();
+void equalizer_onoff();
 
 /****************************** End Of Module *******************************/
 #endif /* EQUALIZER_H_ */

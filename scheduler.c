@@ -84,6 +84,7 @@ void task_start(char *name,
   task_pool[id].sem = 0;
   task_pool[id].state = 0;
   task_pool[id].timer = 0;
+  task_pool[id].event = TE_RESET;
   task_pool[id].runtime_min = ~0;
   task_pool[id].runtime_max = 0;
 }
@@ -115,6 +116,11 @@ void task_wait(INT16U millisec)
 void task_set_state(INT8U state)
 {
   (*current_task).state = state;
+}
+
+void task_clear_event()
+{
+  (*current_task).event = TE_NOEVENT;
 }
 
 

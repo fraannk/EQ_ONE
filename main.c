@@ -39,14 +39,14 @@
 
 /*****************************   Functions   *******************************/
 
-void status( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data )
+void status( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
   emp_toggle_status_led();
-  task_set_state( my_state ? 0 : 1 );
+  task_set_state( state ? 0 : 1 );
   task_wait( 250 );
 }
 
-void echo( INT8U my_id, INT8U my_state, TASK_EVENT event, INT8U data )
+void ps_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
   INT8U ch=0;
   if(file_read(COM1, &ch))
@@ -81,7 +81,6 @@ int main( void )
   // Initialize and run the scheduler
   scheduler_init();
   task_start("Status", TP_LOW, status);
-  task_start("Echo", TP_HIGH, echo);
   task_start("UART_RX", TP_HIGH, uart0_rx_task);
   task_start("UART_TX", TP_HIGH, uart0_tx_task);
   task_start("Shell", TP_MEDIUM, shell);

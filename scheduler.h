@@ -23,6 +23,7 @@
 /***************************** Include files *******************************/
 #include <stdint.h>
 #include "emp_type.h"
+#include "file.h"
 
 /*****************************    Defines    *******************************/
 #define         TASK_POOL_MAX         128
@@ -46,7 +47,8 @@ typedef enum{
 
 typedef enum{
   TE_NOEVENT  = 0x0,
-  TE_TIMEOUT  = 0x1
+  TE_TIMEOUT  = 0x1,
+  TE_RESET    = 0x2
 } TASK_EVENT;
 
 /********************** External declaration of Variables ******************/
@@ -60,8 +62,11 @@ void task_start(char *name, TASK_PRIORITY priority , void (*task)(INT8U, INT8U, 
 void task_wait(INT16U millisec);
 
 void task_set_state(INT8U state);
+void task_clear_event();
 
 void scheduler_init();
+
+void task_status( FILE file_handler );
 
 void scheduler();
 /*****************************************************************************

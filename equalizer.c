@@ -33,6 +33,11 @@ INT8U   levels[16];
 INT8U   sample_count = 64;
 INT32U  sample_sum = 0;
 
+INT8U   eq_on = 0;
+
+FP32 W_L[3];
+FP32 W_R[3];
+
 /*****************************   Functions   *******************************/
 extern void sample_handler()
 {
@@ -44,6 +49,18 @@ extern void sample_handler()
   static sample_type sample;
   audio_out(sample);
   audio_in(&sample);
+
+  if( eq_on )
+  {
+    FP32 left_ch = (FP32)(sample.left-2048);
+    FP32 right_ch = (FP32)(sample.right-2048);
+
+    FP32 left =  iir_filter_sos(left_ch, a, b, W_L);
+    FP32 right = iir_filter_sos(right_ch, a, b, W_R);
+
+    sample.left = (INT16U)(left+2048);
+    sample.right = (INT16U)(right+2048);
+  }
 
   debug_pins_low(DEBUG_P2);
 
@@ -76,12 +93,18 @@ extern void sample_handler()
 */
 }
 
+void equalizer_onoff()
+{
+  eq_on = eq_on ? 0 : 1;
+}
+
 void equalizer_init()
 {
   // Turn audio on
   line_in( ON );
   line_out( ON );
 
+  iir_set_coefficients(a, b);
 }
 
 /****************************** End Of Module *******************************/
