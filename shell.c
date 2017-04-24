@@ -19,6 +19,7 @@
 /***************************** Include files *******************************/
 #include "shell.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include "scheduler.h"
 #include "file.h"
 #include "uart.h"
@@ -26,7 +27,7 @@
 #include "global.h"
 #include "equalizer.h"
 #include "gfstring.h"
-#include "string.h"
+#include <string.h>
 
 
 /*****************************    Defines    *******************************/
@@ -42,10 +43,36 @@ typedef enum{
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
+char *get_cmd(char *cmd_line)
+{
+  INT8U index = 0;
+  const char *seperator = "\x20";
+
+  char *cmd = NULL;
+
+  index = strcspn( cmd_line, seperator);        // Search for first space
+  if(index)
+  {
+    cmd = malloc(index+1);
+    strncpy( cmd, cmd_line, index);
+    cmd[index] = 0x00;
+  }
+
+  return(cmd);
+}
+
+BOOLEAN cmd_compare(char *cmd, char *str)
+{
+  return( strcmp( cmd, str) == 0 ? 1 : 0 );
+}
+
+
 void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
   static char cmd_line[127];
   static INT8U cmd_index = 0;
+
+  char *cmd;
 
   if(event == TE_RESET)
   {
@@ -97,7 +124,9 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
           }
           break;
         case EXECUTE:
-          if(cmd_line[0] == 'e' && cmd_line[1] == 'x' && cmd_line[2] == 'i' && cmd_line[3] == 't')
+          cmd = get_cmd(cmd_line);
+
+          if( cmd_compare(cmd, "exit") )
           {
             task_event(TE_RESET);
             gfprintf(COM1, "\r\n   ... Bye\r\n");
@@ -107,9 +136,9 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
             if(cmd_index != 0)
             {
 
-              if(cmd_line[0] == 'p' && cmd_line[1] == 's' )
+              if( cmd_compare(cmd, "ps")  )
                 task_status(COM1);
-              else if(cmd_line[0] == 'e' )
+              else if( cmd_compare(cmd, "eq")  )
                 equalizer_onoff();
               else
                 gfprintf(COM1, "\r\nUnknown command : %s\r\n", cmd_line);
