@@ -25,6 +25,25 @@
 #include "dsp.h"
 
 /*****************************    Defines    *******************************/
+typedef struct band_s{
+  INT8U            id;
+  INT8U            name[40];
+  INT16U           gain;
+  INT16U           frequency;
+  INT16U           bandwidth;
+  INT8U            type;
+  FP32             a_coeff[3];
+  FP32             b_coeff[3];
+  struct band_s    *next_band;
+} band_t;
+
+typedef struct ep {
+  INT8U      id;
+  INT8U      name[40];
+  band_t     *band;
+  struct ep  *next_profile;
+} ep_t;
+
 
 /*****************************   Constants   *******************************/
 
@@ -35,7 +54,14 @@ INT32U  sample_sum = 0;
 
 INT8U   eq_on = 0;
 
+ep_t *equalizer_profile;
+
 /*****************************   Functions   *******************************/
+
+
+
+
+
 extern void sample_handler()
 {
   debug_pins_toggle(DEBUG_P1);
