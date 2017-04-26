@@ -29,11 +29,9 @@
 #define IIR_NUM_LENGTH      3
 
 /*********** math defines ***********/
-#ifndef PI
-  #define PI 3.14159265f
-#endif
 
-#define SQRT_2 1.4142135623f
+#define PI      3.14159265f
+#define SQRT_2  1.4142135623f
 
 
 /************* filter types **************/
@@ -43,26 +41,46 @@
 #define IIR_HS          4
 
 
-#define N_SAMPLES 1000
+#define MAX_BAND      10
+
+
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-INT8U   bands;
 
+typedef struct params{
+ FP32 bandwith;
+ FP32 frequency;
+ FP32 gain;
+ INT8U filter_type;
+}param_t;
 
+FP32 A[MAX_BAND][3];
+FP32 B[MAX_BAND][3];
+FP32 W[MAX_BAND][3];
+FP32 A_temp[MAX_BAND][3];
+FP32 B_temp[MAX_BAND][3];
+param_t parameters;
+coef_t  temp_coef;
+
+BOOLEAN filter_is_on;
+
+INT8U active_band = 0;
+INT8U active_band_temp=0;
 
 /*****************************   Functions   *******************************/
 void iir_init_dsp_states()
 {
-  for(INT8U i=0; i < K_MAX; i++)
+  for(INT8U i=0; i < MAX_BAND; i++)
   {
     for(INT8U j=0; j < 3; j++)
     {
       W[i][j] = 0;
-      A[i][j] = 0;
-      B[i][j] = 0;
     }
   }
+  iir_filter_disable();
+
 
 }
 
@@ -83,110 +101,113 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
     return out;
 }
 
-FP32 iir_filter_cascade(INT8U band,         /* number of bands*/
-                        FP32 A[K_MAX][3],   /* A coefficient matrix */
-                        FP32 B[K_MAX][3],   /* B coefficient matrix*/
-                        FP32 W[K_MAX][3],   /* State matrix*/
-                        FP32 in)            /* input sample */
+FP32 iir_filter_cascade(FP32 in)            /* input sample */
 {
     INT8U i;
     FP32 out;
 
     out = in;
-
-    for(i = 0; i < band; i++)
-        out = iir_filter_sos(out,A[i],B[i],W[i]);
-
+    if(filter_on())
+    {
+      for(i=0; i< active_band;i++)
+          out = iir_filter_sos(out,A[i],B[i], W[i]);
+    }
     return out;
 }
 
-void iir_calc_coef_peak(FP32 *a,FP32 *b,FP32 *param)
+void iir_calc_coef_peak(FP32 *a,FP32 *b)
 {
 
-  FP32 G,w_0,beta,W;
+  FP32 G,w_0,beta,G_B,W;
+  w_0 = 2.0* PI *  parameters.frequency * ( 1.0 / SAMPLE_RATE );
+  W = parameters.bandwith*2.0*PI*( 1.0 / SAMPLE_RATE );
+  G =  powf( 10.0, ( parameters.gain /20.0 ) );
 
-  G =  powf( 10.0, ( param[1]/20.0 ) );
-  w_0 = 2.0* PI * param[2] * ( 1.0 / SAMPLE_RATE );
-  W = tanf( w_0/param[0] );
-  beta = sqrtf(G) + W;
+  G_B = sqrtf((1.0 + G*G)/2.0);
+
+
+  beta = sqrtf(((G_B*G_B) - 1.0)/((G*G) - (G_B*G_B)))*tanf(W/2.0);
   a[0] = 1.0;
-  a[1] = - (2.0* sqrtf(G)*cosf( w_0 ) )/beta;
-  a[2] = ( sqrtf(G) - W )/beta;
-  b[0] = ( sqrtf(G) + G*W ) / beta;
-  b[1] = - (2.0*sqrtf(G)*cosf( w_0) )/beta;
-  b[2] = (sqrtf(G) - G*W)/beta;
+  a[1] = -2.0*((1.0*cos(w_0))/(1.0 + beta));
+  a[2] = (1.0 - beta)/(1.0 + beta);
+  b[0] = ((1.0 + G*beta)/(1.0 + beta));
+  b[1] = -2.0*((cos(w_0))/(1.0+beta));
+  b[2] =((1.0 - G*beta)/(1.0 + beta));
 
 }
-void iir_calc_coef_hs(FP32 *a,FP32 *b,FP32 *param)
+void iir_calc_coef_hs(FP32 *a,FP32 *b)
 {
-  FP32 G,w_0,beta,W;
-  G =  powf( 10.0, ( param[1]/20.0 ) );
-  w_0 = 2.0* PI * param[2] * ( 1.0 / SAMPLE_RATE );
-  W = tanf( w_0/param[0] );
-  beta = sqrtf(G)*W*W + SQRT_2*W*powf( G, 0.25) + 1.0;
+  FP32 G,w_0,beta,G_B,w_c;
+  G =  powf( 10.0, ( parameters.gain /20.0 ) );
+  G_B = sqrtf((1.0 + G*G)/2.0);
+  w_0 = PI;
+  w_c =2.0*PI * parameters.frequency * (1.0/SAMPLE_RATE);
+  beta = sqrtf((G_B*G_B - 1.0)/(G*G - G_B*G_B))*tanf((PI- w_c)/2.0);
   a[0] = 1.0;
-  a[1] =  (2.0 *( sqrtf(G)*W*W - 1.0) )/beta;
-  a[2] = ( sqrtf(G)*W*W - SQRT_2*W*powf(G,0.25) + 1.0 )/beta;
-  b[0] = ( sqrtf(G)*( sqrtf(G) + SQRT_2*W*powf( G, 0.25) + W*W) ) / beta;
-  b[1] = - (sqrtf(G)*2.0*(sqrtf(G) - W*W ))/beta;
-  b[2] =( sqrtf(G)*(sqrtf(G) - SQRT_2*W*powf(G,0.25) + W*W))/beta;
+  a[1] = -2.0*((1.0*cos(w_0))/(1.0 + beta));
+  a[2] = (1.0 - beta)/(1.0 + beta);
+  b[0] = ((1.0 + G*beta)/(1.0 + beta));
+  b[1] = -2.0*((cos(w_0))/(1.0+beta));
+  b[2] =((1.0 - G*beta)/(1.0 + beta));
 }
 
-void iir_calc_coef_ls(FP32 *a,FP32 *b,FP32 *param)
+void iir_calc_coef_ls(FP32 *a,FP32 *b)
 {
 
-  FP32 G,w_0,beta,W;
-  G =  powf( 10.0, ( param[1]/20.0 ) );
-  w_0 = 2* PI * param[2] * ( 1 / SAMPLE_RATE );
-  W = tanf( w_0/param[0] );
-  beta = sqrtf(G) + SQRT_2*W*powf(G, 0.25) + W*W;
+   FP32 G,w_0,beta,G_B,w_c;
+   G =  powf( 10.0, ( parameters.gain /20.0 ) );
+   G_B = sqrtf((1.0 + G*G)/2.0);
+   w_c = 2.0 * PI*parameters.frequency *(1.0/SAMPLE_RATE);
+   beta = sqrtf((G_B*G_B - 1)/(G*G - G_B*G_B))*tanf((w_c )/2.0);
+   w_0 = 0;
+
   a[0] = 1.0;
-  a[1] = ( 2.0*(W*W - sqrtf(G) ) ) /beta;
-  a[2] = ( sqrtf(G) -SQRT_2*W*powf(G,0.25) + W*W  ) /beta;
-  b[0] = (sqrtf(G)*( sqrtf(G)*W*W +SQRT_2*W*powf(G,0.25) + 1.0  )) /beta;
-  b[1] = (  sqrtf(G)*2.0*(sqrtf(G)*W*W - 1.0) ) /beta;
-  b[2] = (sqrtf(G)*( sqrtf(G)*W*W - SQRT_2*W*powf(G,0.25) + 1.0  )) /beta;
+  a[1] = -2.0*((1.0*cos(w_0))/(1.0 + beta));
+  a[2] = (1.0 - beta)/(1.0 + beta);
+  b[0] = ((1.0 + G*beta)/(1.0 + beta));
+  b[1] = -2.0*((cos(w_0))/(1.0+beta));
+  b[2] =((1.0 - G*beta)/(1.0 + beta));
 }
 
-void iir_set_param(FP32 Q,FP32 G,FP32 f_0,INT8U filter_type,param param)
+void iir_set_param(FP32 BW,FP32 G,FP32 f_0,INT8U filter_type)
 {
-  param.filter_type = filter_type;
-  param.param_arr[0] = Q;
-  param.param_arr[1] = G;
-  param.param_arr[2] = f_0;
+  parameters.filter_type = filter_type;
+  parameters.bandwith = BW;
+  parameters.gain= G;
+  parameters.frequency = f_0;
 }
 
-void iir_get_param(FP32 *Q,FP32 *G,FP32 *f_0,INT8U *filter_type, param param)
+void iir_get_param(FP32 *BW,FP32 *G,FP32 *f_0,INT8U *filter_type)
 {
-  *filter_type = param.filter_type;
-  *Q = param.param_arr[0];
-  *G = param.param_arr[1];
-  *f_0 = param.param_arr[2];
+  *filter_type = parameters.filter_type;
+  *BW = parameters.bandwith;
+  *G = parameters.gain;
+  *f_0 = parameters.frequency;
 }
 
-void iir_calc_coef(FP32 *a,FP32 *b,param param)
+void iir_calc_coef(FP32 a[],FP32 b[])
 {
 
-    switch(param.filter_type)
+    switch(parameters.filter_type)
     {
         case IIR_PEAK:
-            iir_calc_coef_peak(a,b,param.param_arr);
+            iir_calc_coef_peak(a,b);
         break;
         case IIR_NOTCH:
-            iir_calc_coef_peak(a,b,param.param_arr);
+            iir_calc_coef_peak(a,b);
         break;
         case IIR_HS:
-            iir_calc_coef_hs(a,b,param.param_arr);
+            iir_calc_coef_hs(a,b);
         break;
         case IIR_LS:
-            iir_calc_coef_ls(a,b,param.param_arr);
+            iir_calc_coef_ls(a,b);
         break;
     }
 }
 
 
 void iir_demo_eq()
-{
+{/*
   FP32 Q[] =      {   5,      5,          5,        5,        5       };
   FP32 f_0[] =    {   500,    1500,       2500,     5000,     8000    };
   FP32  G[] =     {   -3,     5,          -5,       3,        10      };
@@ -207,8 +228,78 @@ void iir_demo_eq()
   }
 
   for(INT8U i=0; i < BUFF_SIZE;i++)
-    out[i] = iir_filter_cascade(bands, A, B, W, in[i]);
+    out[i] = iir_filter_cascade(bands, A, B, W, in[i]);*/
 
+}
+
+
+
+
+BOOLEAN iir_filter_clear()
+{
+  active_band_temp = 0;
+  for(INT8U i=0; i < MAX_BAND; i++)
+  {
+      for(INT8U j=0; j < 3; j++)
+      {
+          A_temp[i][j]=0;
+      }
+  }
+  return TRUE;
+}
+
+BOOLEAN iir_filter_add(coef_t coef)
+{
+  INT8U i;
+
+  if(active_band_temp > MAX_BAND  )
+  {
+   return FALSE;
+  }
+  for(i = 0; i < 3;i++)
+  {
+    A_temp[active_band_temp][i] = coef.a[i];
+    B_temp[active_band_temp][i] = coef.b[i];
+  }
+  active_band_temp++;
+  return TRUE;
+}
+void iir_filter_use()
+{
+
+  INT8U i,j;
+  iir_filter_disable();
+  for(i=0; i< active_band_temp;i++)
+  {
+    for(j=0; j < 3; j++)
+    {
+      A[i][j] =  A_temp[i][j];
+      B[i][j] =  B_temp[i][j];
+    }
+
+  }
+  active_band = active_band_temp;
+  iir_filter_enable();
+}
+
+coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth)
+{
+  iir_set_param(bandwidth, gain, frequency, type);
+  iir_calc_coef(temp_coef.a,temp_coef.b);
+  return &temp_coef;
+}
+
+void iir_filter_enable()
+{
+  filter_is_on = TRUE ;
+}
+void iir_filter_disable()
+{
+  filter_is_on = FALSE;
+}
+BOOLEAN filter_on()
+{
+  return filter_is_on ? TRUE : FALSE;
 }
 /****************************** End Of Module *******************************/
 
