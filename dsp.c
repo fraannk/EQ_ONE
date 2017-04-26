@@ -101,7 +101,7 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
     return out;
 }
 
-FP32 iir_filter_cascade(FP32 in)            /* input sample */
+FP32 dsp_iir_filter(FP32 in)            /* input sample */
 {
     INT8U i;
     FP32 out;

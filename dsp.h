@@ -52,8 +52,10 @@ FP32 iir_filter_sos(FP32 in,FP32 *a,FP32 *b,FP32 *states_sos);
 *   Function : filters signal
 ******************************************************************************/
 
-FP32 iir_filter_cascade(FP32 in);
-
+FP32 dsp_iir_filter(FP32 in);
+BOOLEAN iir_filter_clear(void);
+BOOLEAN iir_filter_add(coef_t coef);
+void iir_filter_use();
 
 void iir_calc_coef(FP32 *a,FP32 *b);
 void iir_calc_coef_peak(FP32 *a,FP32 *b);
@@ -62,9 +64,7 @@ void iir_calc_coef_ls(FP32 *a,FP32 *b);
 
 
 
-BOOLEAN iir_filter_clear(void);
-BOOLEAN iir_filter_add(coef_t coef);
-void iir_filter_use();
+
 
 coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth);
 void iir_set_param(FP32 Q,FP32 G,FP32 f_0,INT8U filter_type);
