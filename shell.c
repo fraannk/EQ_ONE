@@ -124,6 +124,7 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
           }
           break;
         case EXECUTE:
+          // cmd line syntax : cmd -arg:val -arg:val
           cmd = get_cmd(cmd_line);
 
           if( cmd_compare(cmd, "exit") )
@@ -140,6 +141,10 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
                 task_status(COM1);
               else if( cmd_compare(cmd, "eq")  )
                 equalizer_onoff();
+              else if( cmd_compare(cmd, "help") )
+              {
+                gfprintf(COM1, "\r\nCommands : exit, eq, ps");
+              }
               else
                 gfprintf(COM1, "\r\nUnknown command : %s\r\n", cmd_line);
             }
