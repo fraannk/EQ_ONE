@@ -81,8 +81,8 @@ extern void sample_handler()
     //FP32 left =  iir_filter_sos(left_ch, a, b, W_L);
     //FP32 right = iir_filter_sos(right_ch, a, b, W_R);
 
-    FP32 left =  iir_filter_cascade(5, A, B, W, left_ch);
-    FP32 right = iir_filter_cascade(5, A, B, W, right_ch);
+    FP32 left =  iir_filter_cascade(left_ch);
+    FP32 right = iir_filter_cascade(right_ch);
 
     sample.left = (INT16U)(left+2048);
     sample.right = (INT16U)(right+2048);
@@ -130,8 +130,8 @@ void equalizer_init()
   line_in( ON );
   line_out( ON );
 
-  //iir_init_dsp_states();
-  iir_demo_eq();
+  iir_init_dsp_states();
+
 }
 
 /****************************** End Of Module *******************************/
