@@ -276,8 +276,16 @@ extern void sample_handler()
     FP32 left_ch = (FP32)(sample.left-2048);
     FP32 right_ch = (FP32)(sample.right-2048);
 
+<<<<<<< HEAD
+    //FP32 left =  iir_filter_sos(left_ch, a, b, W_L);
+    //FP32 right = iir_filter_sos(right_ch, a, b, W_R);
+
+    FP32 left =  iir_filter_cascade(left_ch);
+    FP32 right = iir_filter_cascade(right_ch);
+=======
     FP32 left =  dsp_iir_filter(left_ch);
     FP32 right = dsp_iir_filter(right_ch);
+>>>>>>> f7512c0fb845f6b0fc65a808c1579461e7bb8356
 
     sample.left = (INT16U)(left+2048);
     sample.right = (INT16U)(right+2048);
@@ -325,6 +333,9 @@ void equalizer_init()
   line_in( ON );
   line_out( ON );
 
+<<<<<<< HEAD
+  iir_init_dsp_states();
+=======
   // Make first Profile
   ep_t *profile = profile_create();
   strcpy(profile->name, "No bass");
@@ -356,6 +367,7 @@ void equalizer_init()
   profile_add( profile );
 
   profile_use(profile->id);
+>>>>>>> f7512c0fb845f6b0fc65a808c1579461e7bb8356
 
 }
 
