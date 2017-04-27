@@ -98,8 +98,9 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
   return out;
 }
 
-FP32 dsp_iir_filter(FP32 in)            /* input sample */
+INT16U dsp_iir_filter( INT16U sample )            /* input sample */
 {
+  FP32 in = (FP32)(sample-2048);
   INT8U i;
   FP32 out;
 
@@ -109,7 +110,9 @@ FP32 dsp_iir_filter(FP32 in)            /* input sample */
     for(i=0; i< active_band;i++)
       out = iir_filter_sos(out,A[i],B[i], W[i]);
   }
-  return out;
+
+  INT16U sample_out = (INT16U)(out+2048);
+  return sample_out;
 }
 
 void iir_calc_coef_peak(FP32 *a,FP32 *b)

@@ -68,20 +68,13 @@ FP32 iir_filter_sos(FP32 in,FP32 *a,FP32 *b,FP32 *states_sos);
 *   Function : filters input sample with a biquad filter
 ******************************************************************************/
 
-<<<<<<< HEAD
-FP32 iir_filter_cascade(FP32 in);
+INT16U dsp_iir_filter( INT16U sample);
 /*****************************************************************************
 *   Input    : Input sample
 *   Output   : filtered sample
 *   Function : Cascade biquads
 ******************************************************************************/
 
-=======
-FP32 dsp_iir_filter(FP32 in);
-BOOLEAN iir_filter_clear(void);
-BOOLEAN iir_filter_add(coef_t coef);
-void iir_filter_use();
->>>>>>> f7512c0fb845f6b0fc65a808c1579461e7bb8356
 
 void iir_calc_coef(FP32 *a,FP32 *b);
 /*****************************************************************************
@@ -113,7 +106,6 @@ void iir_calc_coef_ls(FP32 *a,FP32 *b);
 
 
 
-<<<<<<< HEAD
 BOOLEAN iir_filter_clear(void);
 /*****************************************************************************
 *   Input    : none
@@ -134,9 +126,6 @@ void iir_filter_use();
 *   Output   : none
 *   Function : transfers coefficient matrix to active coefficients
 ******************************************************************************/
-=======
-
->>>>>>> f7512c0fb845f6b0fc65a808c1579461e7bb8356
 
 coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth);
 /*****************************************************************************
