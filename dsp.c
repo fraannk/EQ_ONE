@@ -25,10 +25,8 @@
 
 
 /*****************************    Defines    *******************************/
-#define IIR_DENOM_LENGTH    2
-#define IIR_NUM_LENGTH      3
 
-/*********** math defines ***********/
+/*********** math ******************/
 
 #define PI      3.14159265f
 #define SQRT_2  1.4142135623f
@@ -39,6 +37,7 @@
 #define IIR_NOTCH       2
 #define IIR_LS          3
 #define IIR_HS          4
+
 
 
 #define MAX_BAND      10
@@ -56,18 +55,19 @@ typedef struct params{
  INT8U filter_type;
 }param_t;
 
-FP32 A[MAX_BAND][3];
-FP32 B[MAX_BAND][3];
-FP32 W[MAX_BAND][3];
-FP32 A_temp[MAX_BAND][3];
-FP32 B_temp[MAX_BAND][3];
+
+FP32 A[MAX_BAND][3];      // coefficient buffer for iir_cascade()
+FP32 B[MAX_BAND][3];      // coefficient buffer for iir_cascade()
+FP32 W[MAX_BAND][3];      // state variable buffer for iir_cascade()
+FP32 A_temp[MAX_BAND][3]; // coefficient buffer for temp values
+FP32 B_temp[MAX_BAND][3]; // coefficient buffer for temp values
+
 param_t parameters;
 coef_t  temp_coef;
-
 BOOLEAN filter_is_on;
-
 INT8U active_band = 0;
 INT8U active_band_temp=0;
+
 
 /*****************************   Functions   *******************************/
 void iir_init_dsp_states()
@@ -89,30 +89,30 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
                     FP32 *b,            /* b coefficients */
                     FP32 *states_sos)   /* sos states */
 {
-    FP32 out = 0;
-    // difference equation
-    states_sos[0] = in - a[1]*states_sos[1] - a[2]*states_sos[2];
-    out = b[0]*states_sos[0] + b[1]*states_sos[1] + b[2]*states_sos[2];
+  FP32 out = 0;
+  // difference equation
+  states_sos[0] = in - a[1]*states_sos[1] - a[2]*states_sos[2];
+  out = b[0]*states_sos[0] + b[1]*states_sos[1] + b[2]*states_sos[2];
 
-   // set next states
-    states_sos[2] = states_sos[1];
-    states_sos[1] = states_sos[0];
+ // set next states
+  states_sos[2] = states_sos[1];
+  states_sos[1] = states_sos[0];
 
-    return out;
+  return out;
 }
 
 FP32 iir_filter_cascade(FP32 in)            /* input sample */
 {
-    INT8U i;
-    FP32 out;
+  INT8U i;
+  FP32 out;
 
-    out = in;
-    if(filter_on())
-    {
-      for(i=0; i< active_band;i++)
-          out = iir_filter_sos(out,A[i],B[i], W[i]);
-    }
-    return out;
+  out = in;
+  if(filter_on())
+  {
+    for(i=0; i< active_band;i++)
+      out = iir_filter_sos(out,A[i],B[i], W[i]);
+  }
+  return out;
 }
 
 void iir_calc_coef_peak(FP32 *a,FP32 *b)
@@ -122,10 +122,7 @@ void iir_calc_coef_peak(FP32 *a,FP32 *b)
   w_0 = 2.0* PI *  parameters.frequency * ( 1.0 / SAMPLE_RATE );
   W = parameters.bandwith*2.0*PI*( 1.0 / SAMPLE_RATE );
   G =  powf( 10.0, ( parameters.gain /20.0 ) );
-
   G_B = sqrtf((1.0 + G*G)/2.0);
-
-
   beta = sqrtf(((G_B*G_B) - 1.0)/((G*G) - (G_B*G_B)))*tanf(W/2.0);
   a[0] = 1.0;
   a[1] = -2.0*((1.0*cos(w_0))/(1.0 + beta));
@@ -135,6 +132,7 @@ void iir_calc_coef_peak(FP32 *a,FP32 *b)
   b[2] =((1.0 - G*beta)/(1.0 + beta));
 
 }
+
 void iir_calc_coef_hs(FP32 *a,FP32 *b)
 {
   FP32 G,w_0,beta,G_B,w_c;
@@ -154,13 +152,12 @@ void iir_calc_coef_hs(FP32 *a,FP32 *b)
 void iir_calc_coef_ls(FP32 *a,FP32 *b)
 {
 
-   FP32 G,w_0,beta,G_B,w_c;
-   G =  powf( 10.0, ( parameters.gain /20.0 ) );
-   G_B = sqrtf((1.0 + G*G)/2.0);
-   w_c = 2.0 * PI*parameters.frequency *(1.0/SAMPLE_RATE);
-   beta = sqrtf((G_B*G_B - 1)/(G*G - G_B*G_B))*tanf((w_c )/2.0);
-   w_0 = 0;
-
+  FP32 G,w_0,beta,G_B,w_c;
+  G =  powf( 10.0, ( parameters.gain /20.0 ) );
+  G_B = sqrtf((1.0 + G*G)/2.0);
+  w_c = 2.0 * PI*parameters.frequency *(1.0/SAMPLE_RATE);
+  beta = sqrtf((G_B*G_B - 1)/(G*G - G_B*G_B))*tanf((w_c )/2.0);
+  w_0 = 0;
   a[0] = 1.0;
   a[1] = -2.0*((1.0*cos(w_0))/(1.0 + beta));
   a[2] = (1.0 - beta)/(1.0 + beta);
@@ -188,50 +185,22 @@ void iir_get_param(FP32 *BW,FP32 *G,FP32 *f_0,INT8U *filter_type)
 void iir_calc_coef(FP32 a[],FP32 b[])
 {
 
-    switch(parameters.filter_type)
-    {
-        case IIR_PEAK:
-            iir_calc_coef_peak(a,b);
-        break;
-        case IIR_NOTCH:
-            iir_calc_coef_peak(a,b);
-        break;
-        case IIR_HS:
-            iir_calc_coef_hs(a,b);
-        break;
-        case IIR_LS:
-            iir_calc_coef_ls(a,b);
-        break;
-    }
-}
-
-
-void iir_demo_eq()
-{/*
-  FP32 Q[] =      {   5,      5,          5,        5,        5       };
-  FP32 f_0[] =    {   500,    1500,       2500,     5000,     8000    };
-  FP32  G[] =     {   -3,     5,          -5,       3,        10      };
-  INT8U types[] = {   IIR_HS, IIR_PEAK, IIR_NOTCH,  IIR_PEAK, IIR_LS  };
-  bands = 5;
-  iir_init_dsp_states();
- // fill parameters struct
-  for(INT8U i=0; i < bands; i++)
+  switch(parameters.filter_type)
   {
-      iir_set_param(Q[i],G[i],f_0[i],types[i],parameters[i]);
-
+    case IIR_PEAK:
+        iir_calc_coef_peak(a,b);
+    break;
+    case IIR_NOTCH:
+        iir_calc_coef_peak(a,b);
+    break;
+    case IIR_HS:
+        iir_calc_coef_hs(a,b);
+    break;
+    case IIR_LS:
+        iir_calc_coef_ls(a,b);
+    break;
   }
-
-  // calc coeff A,B from param_arr
-  for(INT8U i=0; i < bands; i++)
-  {
-      iir_calc_coef(A[i],B[i],parameters[i]);
-  }
-
-  for(INT8U i=0; i < BUFF_SIZE;i++)
-    out[i] = iir_filter_cascade(bands, A, B, W, in[i]);*/
-
 }
-
 
 
 
@@ -240,10 +209,10 @@ BOOLEAN iir_filter_clear()
   active_band_temp = 0;
   for(INT8U i=0; i < MAX_BAND; i++)
   {
-      for(INT8U j=0; j < 3; j++)
-      {
-          A_temp[i][j]=0;
-      }
+    for(INT8U j=0; j < 3; j++)
+    {
+        A_temp[i][j]=0;
+    }
   }
   return TRUE;
 }
