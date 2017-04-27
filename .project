@@ -24,4 +24,10 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>objdump_outputs</name>
+			<value>dsp.s</value>
+		</variable>
+	</variableList>
 </projectDescription>

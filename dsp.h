@@ -25,7 +25,19 @@
 #include "emp_type.h"
 
 /*****************************    Defines    *******************************/
+typedef enum {
+  iir_none    = 0,
+  iir_peak    = 1,
+  iir_notch   = 2,
+  iir_ls      = 3,
+  iir_hs      = 4
+}iir_filter_type;
 
+#define IIR_NONE        0
+#define IIR_PEAK        1
+#define IIR_NOTCH       2
+#define IIR_LS          3
+#define IIR_HS          4
 
 /********************** External declaration of Variables ******************/
 
@@ -56,6 +68,7 @@ FP32 iir_filter_sos(FP32 in,FP32 *a,FP32 *b,FP32 *states_sos);
 *   Function : filters input sample with a biquad filter
 ******************************************************************************/
 
+<<<<<<< HEAD
 FP32 iir_filter_cascade(FP32 in);
 /*****************************************************************************
 *   Input    : Input sample
@@ -63,6 +76,12 @@ FP32 iir_filter_cascade(FP32 in);
 *   Function : Cascade biquads
 ******************************************************************************/
 
+=======
+FP32 dsp_iir_filter(FP32 in);
+BOOLEAN iir_filter_clear(void);
+BOOLEAN iir_filter_add(coef_t coef);
+void iir_filter_use();
+>>>>>>> f7512c0fb845f6b0fc65a808c1579461e7bb8356
 
 void iir_calc_coef(FP32 *a,FP32 *b);
 /*****************************************************************************
@@ -94,6 +113,7 @@ void iir_calc_coef_ls(FP32 *a,FP32 *b);
 
 
 
+<<<<<<< HEAD
 BOOLEAN iir_filter_clear(void);
 /*****************************************************************************
 *   Input    : none
@@ -114,6 +134,9 @@ void iir_filter_use();
 *   Output   : none
 *   Function : transfers coefficient matrix to active coefficients
 ******************************************************************************/
+=======
+
+>>>>>>> f7512c0fb845f6b0fc65a808c1579461e7bb8356
 
 coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth);
 /*****************************************************************************

@@ -33,10 +33,7 @@
 
 
 /************* filter types **************/
-#define IIR_PEAK        1
-#define IIR_NOTCH       2
-#define IIR_LS          3
-#define IIR_HS          4
+
 
 
 
@@ -101,7 +98,7 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
   return out;
 }
 
-FP32 iir_filter_cascade(FP32 in)            /* input sample */
+FP32 dsp_iir_filter(FP32 in)            /* input sample */
 {
   INT8U i;
   FP32 out;
