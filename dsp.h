@@ -25,7 +25,19 @@
 #include "emp_type.h"
 
 /*****************************    Defines    *******************************/
+typedef enum {
+  iir_none    = 0,
+  iir_peak    = 1,
+  iir_notch   = 2,
+  iir_ls      = 3,
+  iir_hs      = 4
+}iir_filter_type;
 
+#define IIR_NONE        0
+#define IIR_PEAK        1
+#define IIR_NOTCH       2
+#define IIR_LS          3
+#define IIR_HS          4
 
 /********************** External declaration of Variables ******************/
 

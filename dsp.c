@@ -35,10 +35,7 @@
 
 
 /************* filter types **************/
-#define IIR_PEAK        1
-#define IIR_NOTCH       2
-#define IIR_LS          3
-#define IIR_HS          4
+
 
 
 #define MAX_BAND      10
