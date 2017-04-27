@@ -345,6 +345,14 @@ void equalizer_init()
   band_get_coef(band_2);
   profile_add_band( profile, band_2 );
 
+  band_t *band_3 = band_create();
+  band_3->type = iir_peak;
+  band_3->bandwidth = 1000;
+  band_3->frequency = 3000;
+  band_3->gain = 20;
+  band_get_coef(band_3);
+  profile_add_band( profile, band_3 );
+
   profile_add( profile );
 
   profile_use(profile->id);
