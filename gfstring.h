@@ -7,3 +7,4 @@
 #include "file.h"
 
 void gfprintf( FILE fp, const char *Str, ...);
+char* itoa(int i, char b[]);

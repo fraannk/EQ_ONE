@@ -6,8 +6,8 @@
 				<macros>
 					<stringMacro name="CG_TOOL_OBJDUMP" type="VALUE_PATH_FILE" value="/opt/ti/ccsv7/tools/compiler/gcc-arm-none-eabi-4_9-2015q3/bin/arm-none-eabi-objdump"/>
 					<stringMacro name="objdump_outputs" type="VALUE_PATH_FILE" value="dsp.s"/>
-					<stringMacro name="objdump_options" type="VALUE_TEXT" value="-S -l -Mforce-thumb"/>
 					<stringMacro name="objdump_inputs" type="VALUE_TEXT" value="dsp.o"/>
+					<stringMacro name="objdump_options" type="VALUE_TEXT" value="-S -l -Mforce-thumb"/>
 					<stringMacro name="CG_TOOL_LD" type="VALUE_PATH_FILE" value="/opt/ti/ccsv7/tools/compiler/gcc-arm-none-eabi-4_9-2015q3/bin/arm-none-eabi-ld"/>
 				</macros>
 				<externalSettings/>
@@ -20,7 +20,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="out" artifactName="${ProjName}" buildProperties="" cleanCommand="${CG_CLEAN_CMD}" description="" id="com.ti.ccstudio.buildDefinitions.TMS470.Debug.1714605644" name="Debug" parent="com.ti.ccstudio.buildDefinitions.TMS470.Debug" postbuildStep="${CG_TOOL_OBJDUMP} ${objdump_options} ${objdump_inputs} &gt;${objdump_outputs};">
+				<configuration artifactExtension="out" artifactName="${ProjName}" buildProperties="" cleanCommand="${CG_CLEAN_CMD}" description="" id="com.ti.ccstudio.buildDefinitions.TMS470.Debug.1714605644" name="Debug" parent="com.ti.ccstudio.buildDefinitions.TMS470.Debug" postbuildStep="">
 					<folderInfo id="com.ti.ccstudio.buildDefinitions.TMS470.Debug.1714605644." name="/" resourcePath="">
 						<toolChain id="com.ti.ccstudio.buildDefinitions.TMS470_GNU_4.0.exe.DebugToolchain.354370265" name="TI Build Tools" superClass="com.ti.ccstudio.buildDefinitions.TMS470_GNU_4.0.exe.DebugToolchain" targetTool="com.ti.ccstudio.buildDefinitions.TMS470_GNU_4.0.exe.linkerDebug.968368546">
 							<option id="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS.1162855197" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS" valueType="stringList">

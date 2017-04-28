@@ -27,6 +27,7 @@
 #include "string.h"
 #include "scheduler.h"
 #include "emp_lcd1602.h"
+#include "gfstring.h"
 
 /*****************************    Defines    *******************************/
 typedef struct band_s{
@@ -57,10 +58,12 @@ typedef enum{
 
 /*****************************   Variables   *******************************/
 
-state_t equalizer_state = ON;
+state_t equalizer_state = OFF;
 
 ep_t *equalizer_profiles = NULL;
 ep_t *active_profil = NULL;
+
+INT32U audio_int_time = 0;
 
 
 /*****************************   Functions   *******************************/
@@ -282,7 +285,12 @@ void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
   }
 
   lcd_buffer_set_cursor(8,1);
-  lcd_buffer_write("CPU: 99%");
+  lcd_buffer_write("CPU%:");
+
+  INT32U pct = (INT32U)((100/1814.0)*audio_int_time);
+  char b[3];
+  lcd_buffer_set_cursor(13, 1);
+  lcd_buffer_write( itoa(pct, b) );
 
 }
 
@@ -290,6 +298,8 @@ extern void sample_handler()
 {
   debug_pins_toggle(DEBUG_P1);
   debug_pins_high(DEBUG_P2);
+
+  timer_set(0);
 
   pwm_clear_interrupt();
 
@@ -303,6 +313,7 @@ extern void sample_handler()
     sample.right = dsp_iir_filter(sample.right);
   }
 
+  audio_int_time = timer_get();
   debug_pins_low(DEBUG_P2);
 }
 

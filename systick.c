@@ -28,6 +28,8 @@
 #define NVIC_INT_CTRL_UNPEND_SYST 0x02000000    // Unpend a systick int
 #define SYSTICK_PRIORITY    0x7E
 
+#define SYSTICK_RELOAD_VALUE      ( CPU_F / 1000 ) * MS_PER_TICK
+
 /*****************************   Variables   *******************************/
 volatile INT16S ticks = 0;
 
@@ -50,9 +52,22 @@ void disable_global_int()
   __asm("cpsid i");
 }
 
+INT32U systick_touch()
+{
+  INT32U return_time;
+  static INT32U last_touch = 0;              // store last systick touch
+  INT32U now = NVIC_ST_CURRENT_R;            // get current systick value
+  if( now < last_touch )
+    return_time = last_touch - now;
+  else
+    return_time = (SYSTICK_RELOAD_VALUE-now)+last_touch ;
+  last_touch = now;
+  return(return_time);
+}
+
 void systick_init( )
 {
-  INT32U systick_reload_value = ( CPU_F / 1000 ) * MS_PER_TICK;
+  INT32U systick_reload_value = SYSTICK_RELOAD_VALUE;
 
   // Disable systick timer
   NVIC_ST_CTRL_R &= ~(NVIC_ST_CTRL_ENABLE);

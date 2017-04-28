@@ -25,6 +25,7 @@
 #include "file.h"
 #include "gfstring.h"
 #include "global.h"
+#include "systick.h"
 
 /*****************************    Defines    *******************************/
 typedef struct
@@ -224,12 +225,14 @@ void scheduler()
         if( (*current_task).condition == TC_READY )
         {
           (*current_task).condition = TC_RUNNING;
-          timer_set(0);
+          systick_touch();
+          //timer_set(0);
           (*current_task).task( (*current_task).id,
                                 (*current_task).state,
                                 (*current_task).event,
                                 0);
-          INT32U runtime = timer_get();
+          //INT32U runtime = timer_get();
+          INT32U runtime =  systick_touch();
           if ( (*current_task).runtime_min > runtime )
             (*current_task).runtime_min = runtime;
           if ( (*current_task).runtime_max < runtime )

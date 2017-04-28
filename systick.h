@@ -46,6 +46,7 @@ void systick_init();
 *   Function : Initialize the systick interrupt.
 ******************************************************************************/
 
+INT32U systick_touch();
 
 /****************************** End Of Module *******************************/
 #endif
