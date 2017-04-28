@@ -26,7 +26,7 @@
 /*****************************    Defines    *******************************/
 
 // Use this #define to enable the EMP board
-//#define EMP
+#define EMP
 
 // Switch enumerator to be used on IO
 enum io_state
@@ -50,6 +50,7 @@ typedef struct {
 void timer_set(INT32U time );
 
 INT32U timer_get();
+void delay_us(INT32U time);
 
 void hardware_init( INT16U sample_freq );
 /*****************************************************************************

@@ -141,6 +141,10 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
                 task_status(COM1);
               else if( cmd_compare(cmd, "eq")  )
                 equalizer_onoff();
+              else if( cmd_compare(cmd, "p0") )
+                profile_use(0);
+              else if( cmd_compare(cmd, "p1") )
+                profile_use(1);
               else if( cmd_compare(cmd, "help") )
               {
                 gfprintf(COM1, "\r\nCommands : exit, eq, ps");

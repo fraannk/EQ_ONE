@@ -20,6 +20,8 @@
   #define EQUALIZER_H_
 
 /***************************** Include files *******************************/
+#include "emp_type.h"
+#include "scheduler.h"
 
 /*****************************    Defines    *******************************/
 
@@ -30,6 +32,7 @@
 /*************************  Function interfaces ****************************/
 void equalizer_init();
 void equalizer_onoff();
+void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
 
 /****************************** End Of Module *******************************/
 #endif /* EQUALIZER_H_ */

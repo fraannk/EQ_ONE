@@ -25,21 +25,12 @@
 
 
 /*****************************    Defines    *******************************/
-
-/*********** math ******************/
-
+// Math constants
 #define PI      3.14159265f
 #define SQRT_2  1.4142135623f
 
-
-/************* filter types **************/
-
-
-
-
+// Filter
 #define MAX_BAND      10
-
-
 
 /*****************************   Constants   *******************************/
 
@@ -52,6 +43,13 @@ typedef struct params{
  INT8U filter_type;
 }param_t;
 
+typedef enum{
+  dm_float,
+  dm_integer,
+  dm_fixed
+}dsp_mode;
+
+dsp_mode current_dsp_mode = dm_float;
 
 FP32 A[MAX_BAND][3];      // coefficient buffer for iir_cascade()
 FP32 B[MAX_BAND][3];      // coefficient buffer for iir_cascade()
@@ -66,7 +64,23 @@ INT8U active_band = 0;
 INT8U active_band_temp=0;
 
 
+
 /*****************************   Functions   *******************************/
+void dsp_mode_float()
+{
+  current_dsp_mode = dm_float;
+}
+
+void dsp_mode_integer()
+{
+  current_dsp_mode = dm_integer;
+}
+
+void dsp_mode_fixed()
+{
+  current_dsp_mode = dm_fixed;
+}
+
 void iir_init_dsp_states()
 {
   for(INT8U i=0; i < MAX_BAND; i++)
@@ -77,8 +91,6 @@ void iir_init_dsp_states()
     }
   }
   iir_filter_disable();
-
-
 }
 
 FP32 iir_filter_sos(FP32 in,            /* input sample */
@@ -100,18 +112,33 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
 
 INT16U dsp_iir_filter( INT16U sample )            /* input sample */
 {
-  FP32 in = (FP32)(sample-2048);
-  INT8U i;
-  FP32 out;
+  // Set returning value and initialize it with the input sample value
+  INT16U sample_out = sample;
 
-  out = in;
-  if(filter_on())
+  // Switchcase to handle the different modes of the DSP module
+  switch(current_dsp_mode)
   {
-    for(i=0; i< active_band;i++)
-      out = iir_filter_sos(out,A[i],B[i], W[i]);
-  }
+    case dm_float:
+      ; // empty line to fix variable define right after a case.. go figure..
+      FP32 in = (FP32)(sample-2048);
+      FP32 out = in;
 
-  INT16U sample_out = (INT16U)(out+2048);
+      out = in;
+      if(filter_on())
+      {
+        for(INT8U i=0; i< active_band;i++)
+          out = iir_filter_sos( out, A[i] , B[i] , W[i] );
+      }
+
+      sample_out = (INT16U)(out+2048);
+      break;
+    case dm_integer:
+      // do integer stuff here and call a new variation of the iir_filter_sos
+      break;
+    case dm_fixed:
+      // do fixed stuff here and call yet another variation of the iir_filter_sos
+      break;
+  }
   return sample_out;
 }
 

@@ -84,6 +84,8 @@ int main( void )
   task_start("UART_RX", TP_HIGH, uart0_rx_task);
   task_start("UART_TX", TP_HIGH, uart0_tx_task);
   task_start("Shell", TP_MEDIUM, shell);
+  task_start("Eq_LCD", TP_LOW, equalizer_lcd_task);
+  task_start("LCD", TP_HIGH, lcd_buffer_task);
   scheduler();
 
   return(0);

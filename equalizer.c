@@ -25,6 +25,8 @@
 #include "hardware.h"
 #include "dsp.h"
 #include "string.h"
+#include "scheduler.h"
+#include "emp_lcd1602.h"
 
 /*****************************    Defines    *******************************/
 typedef struct band_s{
@@ -47,15 +49,15 @@ typedef struct ep {
   struct ep  *next_profile;
 } ep_t;
 
-
+typedef enum{
+  EQ_ON,
+  EQ_OFF
+}state_t;
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-INT8U   levels[16];
-INT8U   sample_count = 64;
-INT32U  sample_sum = 0;
 
-INT8U   eq_on = 0;
+state_t equalizer_state = ON;
 
 ep_t *equalizer_profiles = NULL;
 ep_t *active_profil = NULL;
@@ -260,6 +262,30 @@ void profile_add_band( ep_t *profile, band_t *band )
   }
 }
 
+void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+{
+  lcd_buffer_clear();
+  lcd_buffer_set_cursor(0,0);
+  lcd_buffer_write(active_profil->name);
+  lcd_buffer_set_cursor(0,1);
+  lcd_buffer_write("Eq: ");
+
+  lcd_buffer_set_cursor(3, 1);
+  switch( equalizer_state )
+  {
+    case EQ_ON:
+      lcd_buffer_write("On");
+      break;
+    case EQ_OFF:
+      lcd_buffer_write("Off");
+      break;
+  }
+
+  lcd_buffer_set_cursor(8,1);
+  lcd_buffer_write("CPU: 99%");
+
+}
+
 extern void sample_handler()
 {
   debug_pins_toggle(DEBUG_P1);
@@ -271,46 +297,18 @@ extern void sample_handler()
   audio_out(sample);
   audio_in(&sample);
 
-  if( eq_on )
+  if( equalizer_state == EQ_ON )
   {
     sample.left = dsp_iir_filter(sample.left);
     sample.right = dsp_iir_filter(sample.right);
   }
 
   debug_pins_low(DEBUG_P2);
-
-  // do important stuff here and fast
-
-/*
-  if(sample.left > 2048)
-    emp_set_led   ( LED_GREEN );
-  if(sample.left > 3072)
-    emp_set_led ( LED_GREEN | LED_YELLOW);
-  if(sample.left > 3500)
-    emp_set_led ( LED_GREEN | LED_YELLOW | LED_RED);
-
-  if( sample_count > 0 )
-  {
-    sample_count--;
-    if( sample.left > 2048 )
-      sample_sum += (INT32U)( (sample.left>>4)-127 );
-  }
-  else
-  {
-    sample_count=64;
-    for( INT8U i=16; i>0; i--)
-    {
-      levels[i] = levels[i-1];
-    }
-    levels[0] = sample_sum>>2;
-    sample_sum = 0;
-  }
-*/
 }
 
 void equalizer_onoff()
 {
-  eq_on = eq_on ? 0 : 1;
+  equalizer_state = equalizer_state == EQ_ON ? EQ_OFF : EQ_ON;
 }
 
 void equalizer_init()
@@ -350,7 +348,37 @@ void equalizer_init()
 
   profile_add( profile );
 
-  profile_use(profile->id);
+  // Make second Profile
+  ep_t *profile2 = profile_create();
+  strcpy(profile2->name, "More music");
+
+  band_t *band_21 = band_create();
+  band_21->type = iir_ls;
+  band_21->bandwidth = 0;
+  band_21->frequency = 200;
+  band_21->gain = -10;
+  band_get_coef(band_21);
+  profile_add_band( profile2, band_21 );
+
+  band_t *band_22 = band_create();
+  band_22->type = iir_hs;
+  band_22->bandwidth = 0;
+  band_22->frequency = 12000;
+  band_22->gain = 10;
+  band_get_coef(band_22);
+  profile_add_band( profile2, band_22 );
+
+  band_t *band_23 = band_create();
+  band_23->type = iir_notch;
+  band_23->bandwidth = 1000;
+  band_23->frequency = 3000;
+  band_23->gain = 10;
+  band_get_coef(band_23);
+  profile_add_band( profile2, band_23 );
+
+  profile_add( profile2 );
+
+  profile_use( profile->id);
 
 }
 

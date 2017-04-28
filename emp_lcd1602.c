@@ -20,10 +20,14 @@
 /***************************** Include files *******************************/
 #include "emp_lcd1602.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include "tm4c123gh6pm.h"
 #include "emp_type.h"
 #include "hardware.h"
 #include "macros.h"
+#include "string.h"
+#include "scheduler.h"
+
 
 
 /*****************************    Defines    *******************************/
@@ -45,9 +49,12 @@
 typedef enum {HIGH, LOW} pin_state;
 
 /*****************************   Variables   *******************************/
-INT8U lcd_display_buffer[LCD_LINES * LCD_CHARS];
+INT8U lcd_display_buffer[LCD_BUF_SIZE];
+INT8U buffer_x = 0;
+INT8U buffer_y = 0;
 
 /*****************************   Functions   *******************************/
+
 void lcd_RS(pin_state pin)
 {
   if(pin == LOW)
@@ -107,6 +114,14 @@ void lcd_write_data(INT8U byte)
   delay_us(41);
 }
 
+void lcd_write_data_nodelay(INT8U byte)
+{
+  lcd_RS(HIGH);
+  lcd_E(LOW);
+  lcd_write_nibble(byte);
+  lcd_write_nibble(byte<<4);
+}
+
 void lcd_set_cursor(INT8U x, INT8U y)
 {
   INT8U ddram_adress = 0x80;
@@ -114,7 +129,7 @@ void lcd_set_cursor(INT8U x, INT8U y)
   lcd_write_instruction(ddram_adress);
 }
 
-void lcd_write_line(INT8U line[])
+void lcd_write_line(char *line)
 {
   INT8U i = 0;
   while( line[i] != 0)
@@ -233,6 +248,31 @@ void lcd_set_custom_font_eq()
   lcd_write_data(0b11111);
 }
 
+void lcd_buffer_set_cursor(INT8U x, INT8U y)
+{
+  if(  y < LCD_LINES && x <= LCD_CHARS )
+  {
+    buffer_x = x;
+    buffer_y = y;
+  }
+}
+
+void lcd_buffer_clear()
+{
+  for(INT8U i = 0; i < LCD_BUF_SIZE; i++ )
+    lcd_display_buffer[i] = 0x20;         // Clear with space
+}
+
+void lcd_buffer_write(char *str)
+{
+  INT8U offset = ( buffer_y << 4 ) + buffer_x;
+  INT8U (* buffer_ptr)[LCD_BUF_SIZE] = NULL;
+  buffer_ptr = (INT8U (*)[LCD_BUF_SIZE])lcd_display_buffer;
+
+  if( sizeof(*str) < (LCD_BUF_SIZE - offset ) )
+    memcpy( &lcd_display_buffer[offset] , str, strlen(str));
+}
+
 void lcd_write_buffer(INT8U *buffer)
 {
   for(INT8U y=0; y < LCD_LINES; y++)
@@ -243,6 +283,22 @@ void lcd_write_buffer(INT8U *buffer)
       lcd_write_data( buffer[x+(16*y)] );
     }
   }
+}
+
+void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+{
+  if(state < LCD_BUF_SIZE)
+  {
+    if(state == 0)
+      lcd_set_cursor(0,0);
+    if(state == 16)
+      lcd_set_cursor(0,1);
+
+    lcd_write_data_nodelay( lcd_display_buffer[state] );
+    task_set_state(++state);
+  }
+  else
+    task_set_state(0);
 }
 
 void lcd_init()

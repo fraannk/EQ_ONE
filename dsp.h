@@ -40,8 +40,6 @@ typedef enum {
 #define IIR_HS          4
 
 /********************** External declaration of Variables ******************/
-
-
 typedef struct coef{
   FP32 a[3];
   FP32 b[3];
@@ -53,6 +51,11 @@ typedef struct coef{
 /*****************************   Constants   *******************************/
 
 /*************************  Function interfaces ****************************/
+// TODO: add comments
+void dsp_mode_float();
+void dsp_mode_integer();
+void dsp_mode_fixed();
+
 void iir_init_dsp_states(void);
 /*****************************************************************************
 *   Input    : none
