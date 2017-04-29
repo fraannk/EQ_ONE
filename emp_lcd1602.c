@@ -52,6 +52,7 @@ typedef enum {HIGH, LOW} pin_state;
 INT8U lcd_display_buffer[LCD_BUF_SIZE];
 INT8U buffer_x = 0;
 INT8U buffer_y = 0;
+INT8U buffer_offset = 0;
 
 /*****************************   Functions   *******************************/
 
@@ -96,7 +97,7 @@ void lcd_write_nibble(INT8U byte)
   delay_us(1);
 }
 
-void lcd_write_instruction(INT8U byte)
+void lcd_direct_write_instruction(INT8U byte)
 {
   lcd_RS(LOW);
   lcd_E(LOW);
@@ -105,7 +106,7 @@ void lcd_write_instruction(INT8U byte)
   delay_us(41);
 }
 
-void lcd_write_data(INT8U byte)
+void lcd_direct_write_data(INT8U byte)
 {
   lcd_RS(HIGH);
   lcd_E(LOW);
@@ -114,7 +115,7 @@ void lcd_write_data(INT8U byte)
   delay_us(41);
 }
 
-void lcd_write_data_nodelay(INT8U byte)
+void lcd_direct_write_data_nodelay(INT8U byte)
 {
   lcd_RS(HIGH);
   lcd_E(LOW);
@@ -122,166 +123,64 @@ void lcd_write_data_nodelay(INT8U byte)
   lcd_write_nibble(byte<<4);
 }
 
-void lcd_set_cursor(INT8U x, INT8U y)
+void lcd_direct_set_cursor(INT8U x, INT8U y)
 {
   INT8U ddram_adress = 0x80;
   ddram_adress |= (y*0x40 + x);
-  lcd_write_instruction(ddram_adress);
+  lcd_direct_write_instruction(ddram_adress);
 }
 
-void lcd_write_line(char *line)
+void lcd_direct_write_line(char *line)
 {
   INT8U i = 0;
   while( line[i] != 0)
   {
-    lcd_write_data(line[i++]);
+    lcd_direct_write_data(line[i++]);
   }
 }
 
-void lcd_clear(void)
+void lcd_direct_clear(void)
 {
   // Clear entire display
-  lcd_write_instruction(0x01);
+  lcd_direct_write_instruction(0x01);
   delay_us(1520);
 }
 
-void lcd_set_custom_font()
+void lcd_direct_write_buffer(INT8U *buffer)
 {
-  lcd_write_instruction(0x40);
-  lcd_write_data(0b10000);
-  lcd_write_data(0b11000);
-  lcd_write_data(0b11100);
-  lcd_write_data(0b11110);
-  lcd_write_data(0b11100);
-  lcd_write_data(0b11000);
-  lcd_write_data(0b10000);
-  lcd_write_data(0b00000);
-
-
-  //lcd_write_instruction(0x41);
-  lcd_write_data(0b00001);
-  lcd_write_data(0b00011);
-  lcd_write_data(0b00111);
-  lcd_write_data(0b01111);
-  lcd_write_data(0b00111);
-  lcd_write_data(0b00011);
-  lcd_write_data(0b00001);
-  lcd_write_data(0b00000);
+  for(INT8U y=0; y < LCD_LINES; y++)
+  {
+    lcd_direct_set_cursor(0, y);
+    for(INT8U x=0 ; x < LCD_CHARS ; x++)
+    {
+      lcd_direct_write_data( buffer[x+(16*y)] );
+    }
+  }
 }
 
-void lcd_set_custom_font_eq()
-{
-  // set start font at CGRAM addr. 0x0
-  lcd_write_instruction(0x40);
-
-  // font 0x0
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b11111);
-  // font 0x1
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  // font 0x2
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  // font 0x3
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  // font 0x4
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  // font 0x5
-  lcd_write_data(0b00000);
-  lcd_write_data(0b00000);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  // font 0x6
-  lcd_write_data(0b00000);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  // font 0x7
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-  lcd_write_data(0b11111);
-}
-
-void lcd_buffer_set_cursor(INT8U x, INT8U y)
+void lcd_set_cursor(INT8U x, INT8U y)
 {
   if(  y < LCD_LINES && x <= LCD_CHARS )
   {
     buffer_x = x;
     buffer_y = y;
+    buffer_offset = (y<<4)+x;
   }
 }
 
-void lcd_buffer_clear()
+void lcd_clear()
 {
   for(INT8U i = 0; i < LCD_BUF_SIZE; i++ )
     lcd_display_buffer[i] = 0x20;         // Clear with space
 }
 
-void lcd_buffer_write(char *str)
+void lcd_write(char *str)
 {
-  INT8U offset = ( buffer_y << 4 ) + buffer_x;
-  INT8U (* buffer_ptr)[LCD_BUF_SIZE] = NULL;
-  buffer_ptr = (INT8U (*)[LCD_BUF_SIZE])lcd_display_buffer;
-
-  if( sizeof(*str) < (LCD_BUF_SIZE - offset ) )
-    memcpy( &lcd_display_buffer[offset] , str, strlen(str));
-}
-
-void lcd_write_buffer(INT8U *buffer)
-{
-  for(INT8U y=0; y < LCD_LINES; y++)
+  if( sizeof(*str) < (LCD_BUF_SIZE - buffer_offset ) )
   {
-    lcd_set_cursor(0, y);
-    for(INT8U x=0 ; x < LCD_CHARS ; x++)
-    {
-      lcd_write_data( buffer[x+(16*y)] );
-    }
+    INT8U len = strlen(str);
+    memcpy( &lcd_display_buffer[buffer_offset] , str, len);
+    buffer_offset += len;
   }
 }
 
@@ -290,11 +189,11 @@ void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
   if(state < LCD_BUF_SIZE)
   {
     if(state == 0)
-      lcd_set_cursor(0,0);
+      lcd_direct_set_cursor(0,0);
     if(state == 16)
-      lcd_set_cursor(0,1);
+      lcd_direct_set_cursor(0,1);
 
-    lcd_write_data_nodelay( lcd_display_buffer[state] );
+    lcd_direct_write_data_nodelay( lcd_display_buffer[state] );
     task_set_state(++state);
   }
   else
@@ -347,34 +246,214 @@ void lcd_init()
   // DL : 0: 4 bit     1: 8 bit       Datalines
   // N  : 0: 1 line    1: 2 lines     Display lines
   // F  : 0: 5x8       1: 5x10        Fontsize
-  lcd_write_instruction(0b00101000);
+  lcd_direct_write_instruction(0b00101000);
 
   // Display  0 0 0 0 1 D C B
   // D  :                             Display on/off
   // C  :                             Cursor on/off
   // B  :                             Blinking on/off
-  lcd_write_instruction(0b00001000);
+  lcd_direct_write_instruction(0b00001000);
 
 
   // Clear entire display
-  lcd_write_instruction(0x01);
+  lcd_direct_write_instruction(0x01);
   delay_us(1520);
 
   // Entry mode set 0 0 0 0 0 1 I/D S
   // I/D  0: Dec          1: Inc
   // S    0: Noshift
-  lcd_write_instruction(0b00000110);
+  lcd_direct_write_instruction(0b00000110);
 
   // LCD ON
-  lcd_write_instruction(0b00001100);
+  lcd_direct_write_instruction(0b00001100);
 
   // Load custom font to LCD CGRAM
   lcd_set_custom_font_eq();
 
   // set cursor to 0,0
-  lcd_set_cursor(0,0);
+  lcd_direct_set_cursor(0,0);
+}
+
+void lcd_set_custom_font()
+{
+  lcd_direct_write_instruction(0x40);
+  lcd_direct_write_data(0b10000);
+  lcd_direct_write_data(0b11000);
+  lcd_direct_write_data(0b11100);
+  lcd_direct_write_data(0b11110);
+  lcd_direct_write_data(0b11100);
+  lcd_direct_write_data(0b11000);
+  lcd_direct_write_data(0b10000);
+  lcd_direct_write_data(0b00000);
 
 
+  //lcd_write_instruction(0x41);
+  lcd_direct_write_data(0b00001);
+  lcd_direct_write_data(0b00011);
+  lcd_direct_write_data(0b00111);
+  lcd_direct_write_data(0b01111);
+  lcd_direct_write_data(0b00111);
+  lcd_direct_write_data(0b00011);
+  lcd_direct_write_data(0b00001);
+  lcd_direct_write_data(0b00000);
+}
+
+void lcd_set_custom_font_eq()
+{
+  // set start font at CGRAM addr. 0x0
+  lcd_direct_write_instruction(0x40);
+
+  // font 0x0
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  // font 0x1
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  // font 0x2
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  // font 0x3
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  // font 0x4
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  // font 0x5
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  // font 0x6
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  // font 0x7
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b11111);
+}
+
+void lcd_set_custom_font2_eq()
+{
+  // set start font at CGRAM addr. 0x0
+  lcd_direct_write_instruction(0x40);
+
+  // font 0x0
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  // font 0x1
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b00000);
+  // font 0x2
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  // font 0x3
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  // font 0x4
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  // font 0x5
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  // font 0x6
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  // font 0x7
+  lcd_direct_write_data(0b11111);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
+  lcd_direct_write_data(0b00000);
 }
 /****************************** End Of Module *******************************/
 

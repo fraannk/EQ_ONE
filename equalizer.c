@@ -57,14 +57,15 @@ typedef enum{
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-
+// Equalizer state, default off
 state_t equalizer_state = OFF;
 
+// Start pointer to EQ profiles
 ep_t *equalizer_profiles = NULL;
 ep_t *active_profil = NULL;
 
+// Time (cycles) spent inside the audio interrupt
 INT32U audio_int_time = 0;
-
 
 /*****************************   Functions   *******************************/
 ep_t *profile_by_id(INT8U id)
@@ -127,8 +128,6 @@ void profile_use(INT8U id)
     iir_filter_use();
   }
 }
-
-
 
 
 INT8U profile_next_id()
@@ -210,7 +209,6 @@ void band_get_coef(band_t *band )
 }
 
 
-
 ep_t *profile_last(ep_t *profile )
 {
   ep_t *current_profile = profile;
@@ -267,31 +265,28 @@ void profile_add_band( ep_t *profile, band_t *band )
 
 void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
-  lcd_buffer_clear();
-  lcd_buffer_set_cursor(0,0);
-  lcd_buffer_write(active_profil->name);
-  lcd_buffer_set_cursor(0,1);
-  lcd_buffer_write("Eq: ");
+  lcd_clear();
+  lcd_set_cursor(0,0);
+  lcd_write(active_profil->name);
+  lcd_set_cursor(0,1);
+  lcd_write("Eq: ");
 
-  lcd_buffer_set_cursor(3, 1);
   switch( equalizer_state )
   {
     case EQ_ON:
-      lcd_buffer_write("On");
+      lcd_write("On");
       break;
     case EQ_OFF:
-      lcd_buffer_write("Off");
+      lcd_write("Off");
       break;
   }
 
-  lcd_buffer_set_cursor(8,1);
-  lcd_buffer_write("CPU%:");
+  lcd_set_cursor(8,1);
+  lcd_write("CPU%:");
 
   INT32U pct = (INT32U)((100/1814.0)*audio_int_time);
   char b[3];
-  lcd_buffer_set_cursor(13, 1);
-  lcd_buffer_write( itoa(pct, b) );
-
+  lcd_write( itoa(pct, b) );
 }
 
 extern void sample_handler()

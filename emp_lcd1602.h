@@ -33,14 +33,14 @@
 
 /*****************************   Functions   *******************************/
 void lcd_init();
-void lcd_write_line(char *line);
-void lcd_write_data(INT8U byte);
-void lcd_set_cursor(INT8U x, INT8U y);
-void lcd_write_buffer(INT8U *buffer);
+void lcd_direct_write_line(char *line);
+void lcd_direct_write_data(INT8U byte);
+void lcd_direct_set_cursor(INT8U x, INT8U y);
+void lcd_direct_write_buffer(INT8U *buffer);
 void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
-void lcd_buffer_set_cursor(INT8U x, INT8U y);
-void lcd_buffer_clear();
-void lcd_buffer_write(char *str);
+void lcd_set_cursor(INT8U x, INT8U y);
+void lcd_clear();
+void lcd_write(char *str);
 
 
 /****************************** End Of Module *******************************/
