@@ -55,6 +55,8 @@ typedef enum{
   EQ_OFF
 }state_t;
 /*****************************   Constants   *******************************/
+const char eq_bars[2][16] = { {32,32,32,32,32,32,32,32, 0, 1, 2, 3, 4, 5, 6, 7},
+                               { 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7} };
 
 /*****************************   Variables   *******************************/
 // Equalizer state, default off
@@ -66,6 +68,9 @@ ep_t *active_profil = NULL;
 
 // Time (cycles) spent inside the audio interrupt
 INT32U audio_int_time = 0;
+
+// Sample holds the current sample filled in by the sample_handler
+volatile sample_type sample;
 
 /*****************************   Functions   *******************************/
 ep_t *profile_by_id(INT8U id)
@@ -265,11 +270,34 @@ void profile_add_band( ep_t *profile, band_t *band )
 
 void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
+  INT8U level_left;
+  INT8U level_right;
+
   lcd_clear();
-  lcd_set_cursor(0,0);
+
+  // VU-meter
+  if(sample.left > 2047)
+    level_left = (INT8U)((sample.left-2047)>>7);
+  else
+    level_left = (INT8U)((2047-sample.left)>>7);
+
+  if(sample.right > 2047)
+    level_right = (INT8U)((sample.right-2047)>>7);
+  else
+    level_right = (INT8U)((2047-sample.right)>>7);
+
+  lcd_set_cursor(0, 0);
+  lcd_write_char(eq_bars[0][level_left]);
+  lcd_write_char(eq_bars[0][level_right]);
+  lcd_set_cursor(0, 1);
+  lcd_write_char(eq_bars[1][level_left]);
+  lcd_write_char(eq_bars[1][level_right]);
+
+  // Profile name
+  lcd_set_cursor(2,0);
   lcd_write(active_profil->name);
-  lcd_set_cursor(0,1);
-  lcd_write("Eq: ");
+  lcd_set_cursor(2,1);
+  lcd_write("Eq:");
 
   switch( equalizer_state )
   {
@@ -281,7 +309,7 @@ void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
       break;
   }
 
-  lcd_set_cursor(8,1);
+  lcd_set_cursor(9,1);
   lcd_write("CPU%:");
 
   INT32U pct = (INT32U)((100/1814.0)*audio_int_time);
@@ -298,7 +326,6 @@ extern void sample_handler()
 
   pwm_clear_interrupt();
 
-  static sample_type sample;
   audio_out(sample);
   audio_in(&sample);
 
@@ -351,6 +378,14 @@ void equalizer_init()
   band_3->gain = 20;
   band_get_coef(band_3);
   profile_add_band( profile, band_3 );
+
+  band_t *band_4 = band_create();
+  band_4->type = iir_peak;
+  band_4->bandwidth = 1000;
+  band_4->frequency = 9000;
+  band_4->gain = 20;
+  band_get_coef(band_4);
+  profile_add_band( profile, band_4 );
 
   profile_add( profile );
 

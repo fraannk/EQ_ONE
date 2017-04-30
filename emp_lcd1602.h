@@ -41,6 +41,9 @@ void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
 void lcd_set_cursor(INT8U x, INT8U y);
 void lcd_clear();
 void lcd_write(char *str);
+void lcd_write_char(char ch);
+void lcd_set_custom_font();
+void lcd_set_custom_font_eq();
 
 
 /****************************** End Of Module *******************************/

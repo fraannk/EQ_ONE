@@ -28,6 +28,7 @@
 
 /*****************************   Constants   *******************************/
 
+
 /*************************  Function interfaces ****************************/
 
 void eq_build_display(INT8U levels[], INT8U *buffer);

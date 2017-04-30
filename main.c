@@ -72,7 +72,7 @@ int main( void )
   // Default EMP setup
   emp_set_led(0);
 
-  // Initialize filesystem
+  // Initialize file system
   files_init();
 
   // Initialize equalizer

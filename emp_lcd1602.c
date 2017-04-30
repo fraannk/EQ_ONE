@@ -184,6 +184,12 @@ void lcd_write(char *str)
   }
 }
 
+void lcd_write_char(char ch)
+{
+  lcd_display_buffer[buffer_offset] = ch;
+  buffer_offset++;
+}
+
 void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
   if(state < LCD_BUF_SIZE)
