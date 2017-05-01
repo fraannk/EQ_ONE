@@ -9,8 +9,17 @@
 *              Project Mode
 *                Left-in    PB5 (AIN11)   ADC0
 *                Right-in   PB4 (AIN10)   ADC0
+*
+*                PWM Mode
 *                Left-out   PB7 (M0PWM1)  PWM module 0 PWM generator 0
 *                Right-out  PB6 (M0PWM0)  PWM module 0 PWM generator 0
+*
+*                DAC Mode
+*                PA2  (SCK)
+*                PA3  (CS)
+*                PA5  (SDA)
+*                PE1  (LDAC)    // Todo:implement
+*                PE2  (SHDN)    // Todo:implement
 *
 *              EMP Mode (with #define EMP) for on board audio circuit
 *                in         PE5 (AIN8)    ADC0
@@ -121,8 +130,21 @@ void audio_out(sample_type sample)
     INT32U mono = (sample.left + sample.right)>>2;
     PWM0_2_CMPA_R = (INT32U)(adc_pwm_ratio * mono);
 #else
+#ifdef PWM
     PWM0_0_CMPA_R = (INT32U)(adc_pwm_ratio * (sample.right));
     PWM0_0_CMPB_R = (INT32U)(adc_pwm_ratio * (sample.left));
+#else
+    // Set right channel outA
+    static INT32U reg;
+    reg = 0b0111 << 12;       // A, buffered, 1xGain, On
+    reg |= sample.left;
+    SSI0_DR_R = reg;
+
+    reg = 0b1111 << 12;       // B, buffered, 1xGain, On
+    reg |= sample.right;
+    SSI0_DR_R = reg;
+#endif
+
 #endif
   }
 }
@@ -681,6 +703,63 @@ INT32U timer_get()
   return (TIMER4_TAR_R);
 }
 
+void spi_init()
+{
+#ifndef EMP
+  // activate the SSI module clock for SSI0
+  bit_set( SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0 );
+
+  // activate GPIO port A click
+  bit_set( SYSCTL_RCGCGPIO_R, SYSCTL_RCGCGPIO_R0);
+
+  // Digital enable pins
+  GPIO_PORTA_DEN_R |= (1<<2 | 1<<3 | 1<<4 | 1<<5);
+
+  // Direction
+  GPIO_PORTA_DIR_R |= (1<<2 | 1<<3 | 1<<5);
+
+  // GPIO PullUp Resistor (GPIOPUR)
+  GPIO_PORTA_PUR_R |=  (1<<4);    // pull up on SSI0RX pin 4
+
+  // Enable the alternate function on PA2, PA3, PA4 & PA5, high==AFSEL
+  GPIO_PORTA_AFSEL_R |= (1<<2 | 1<<3 | 1<<4 | 1<<5 );
+
+  // GPIO portcontrol,
+  INT32U reg = GPIO_PORTA_PCTL_R;
+  reg &= 0x00FFFF00;                             // Clear bits
+  GPIO_PORTA_PCTL_R |= GPIO_PCTL_PA2_SSI0CLK
+                    | GPIO_PCTL_PA3_SSI0FSS
+                    | GPIO_PCTL_PA4_SSI0RX
+                    | GPIO_PCTL_PA5_SSI0TX;      // Set bits
+
+  // SSI 0 master mode and disable SSI
+  SSI0_CR1_R = 0;
+
+  // Configure the SSI clock source (SSICC)
+  SSI0_CC_R = 0;                  // Use system clock
+
+  // Configure the clock prescale divisor (SSICPSR)
+  // SSInClk = SysClk / (CPSDVSR * (1 + SCR))
+  // SSInClk = 10Mhz
+  SSI0_CPSR_R = 10;       // CPSDVSR
+                          // SCR is deafult 0
+
+  // Write the SSICR0 register with
+  // Serial clock rate (SCR)
+  // Desired clock phase/polarity, if using Freescale SPI mode (SPH and SPO)
+  // The protocol mode: Freescale SPI
+  // The data size (DSS)
+
+  bit_clear (SSI0_CR0_R, SSI_CR0_SPH);    // SPH = 0
+  bit_set (SSI0_CR0_R, SSI_CR0_SPO);    // SPO = 0
+  bit_clear (SSI0_CR0_R, 0b110000 );      // Freescale SPI Frame Format
+  bit_set (SSI0_CR0_R, SSI_CR0_DSS_16);   // DDS = 16 bit
+
+  // Enable SSI
+  bit_set (SSI0_CR1_R, SSI_CR1_SSE);
+#endif
+}
+
 void hardware_init( INT16U sample_freq )
 /*****************************************************************************
 *   Header description
@@ -720,6 +799,8 @@ void hardware_init( INT16U sample_freq )
   timer_init();
 
   systick_init();
+
+  spi_init();
 
   // Enable global interrupt
   enable_global_int();

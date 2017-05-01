@@ -26,7 +26,8 @@
 /*****************************    Defines    *******************************/
 
 // Use this #define to enable the EMP board
-#define EMP
+//#define EMP
+//#define PWM
 
 // Switch enumerator to be used on IO
 enum io_state
