@@ -40,19 +40,15 @@
 /*****************************   Functions   *******************************/
 
 void status( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+/*****************************************************************************
+*   Input    : Task parameter block
+*   Output   : -
+*   Function : Status LED task. 250ms toggle os the status led.
+******************************************************************************/
 {
   emp_toggle_status_led();
   task_set_state( state ? 0 : 1 );
   task_wait( 250 );
-}
-
-void ps_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
-{
-  INT8U ch=0;
-  if(file_read(COM1, &ch))
-  {
-    task_status(COM1);
-  }
 }
 
 int main( void )
@@ -62,14 +58,16 @@ int main( void )
 *   Function : Default main entry point
 ******************************************************************************/
 {
-  // Initialize hardware
+  // Initialize hardware with SAMPLE_RATE defined in global.h
   hardware_init( SAMPLE_RATE );
 
-  // Initialize drivers
+  // Initialize LCD driver
   lcd_init();
+
+  // Initialize UART driver
   uart0_init(UART_BAUDRATE, UART_DATABITS, UART_STOPBITS, UART_PARITY);
 
-  // Default EMP setup
+  // Default EMP setup - turn of leds
   emp_set_led(0);
 
   // Initialize file system
@@ -78,7 +76,7 @@ int main( void )
   // Initialize equalizer
   equalizer_init();
 
-  // Initialize and run the scheduler
+  // Initialize and run the scheduler with all the default tasks
   scheduler_init();
   task_start("Status", TP_LOW, status);
   task_start("UART_RX", TP_HIGH, uart0_rx_task);

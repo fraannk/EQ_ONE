@@ -56,7 +56,7 @@ typedef enum{
 }state_t;
 /*****************************   Constants   *******************************/
 const char eq_bars[2][16] = { {32,32,32,32,32,32,32,32, 0, 1, 2, 3, 4, 5, 6, 7},
-                               { 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7} };
+                              { 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7} };
 
 /*****************************   Variables   *******************************/
 // Equalizer state, default off
@@ -70,7 +70,7 @@ ep_t *active_profil = NULL;
 INT32U audio_int_time = 0;
 
 // Sample holds the current sample filled in by the sample_handler
-volatile sample_type sample;
+sample_type sample;
 
 /*****************************   Functions   *******************************/
 ep_t *profile_by_id(INT8U id)
@@ -344,83 +344,88 @@ void equalizer_onoff()
   equalizer_state = equalizer_state == EQ_ON ? EQ_OFF : EQ_ON;
 }
 
+void equalizer_profiles_setup()
+{
+  band_t *band;
+   ep_t *profile;
+
+   // Make first Profile
+   profile = profile_create();
+   strcpy(profile->name, "No bass");
+
+   band = band_create();
+   band->type = iir_ls;
+   band->bandwidth = 0;
+   band->frequency = 400;
+   band->gain = -40;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_hs;
+   band->bandwidth = 0;
+   band->frequency = 17000;
+   band->gain = -40;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->bandwidth = 1000;
+   band->frequency = 3000;
+   band->gain = 20;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->bandwidth = 1000;
+   band->frequency = 9000;
+   band->gain = 20;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   profile_add( profile );
+
+   // Make second Profile
+   profile = profile_create();
+   strcpy(profile->name, "More music");
+
+   band = band_create();
+   band->type = iir_ls;
+   band->bandwidth = 0;
+   band->frequency = 200;
+   band->gain = -10;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_hs;
+   band->bandwidth = 0;
+   band->frequency = 12000;
+   band->gain = 10;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_notch;
+   band->bandwidth = 1000;
+   band->frequency = 3000;
+   band->gain = 10;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   profile_add( profile );
+}
+
 void equalizer_init()
 {
+  equalizer_profiles_setup();
+  profile_use( 0);
+
   // Turn audio on
   line_in( ON );
   line_out( ON );
-
-
-  // Make first Profile
-  ep_t *profile = profile_create();
-  strcpy(profile->name, "No bass");
-
-  band_t *band_1 = band_create();
-  band_1->type = iir_ls;
-  band_1->bandwidth = 0;
-  band_1->frequency = 400;
-  band_1->gain = -40;
-  band_get_coef(band_1);
-  profile_add_band( profile, band_1 );
-
-  band_t *band_2 = band_create();
-  band_2->type = iir_hs;
-  band_2->bandwidth = 0;
-  band_2->frequency = 17000;
-  band_2->gain = -40;
-  band_get_coef(band_2);
-  profile_add_band( profile, band_2 );
-
-  band_t *band_3 = band_create();
-  band_3->type = iir_peak;
-  band_3->bandwidth = 1000;
-  band_3->frequency = 3000;
-  band_3->gain = 20;
-  band_get_coef(band_3);
-  profile_add_band( profile, band_3 );
-
-  band_t *band_4 = band_create();
-  band_4->type = iir_peak;
-  band_4->bandwidth = 1000;
-  band_4->frequency = 9000;
-  band_4->gain = 20;
-  band_get_coef(band_4);
-  profile_add_band( profile, band_4 );
-
-  profile_add( profile );
-
-  // Make second Profile
-  ep_t *profile2 = profile_create();
-  strcpy(profile2->name, "More music");
-
-  band_t *band_21 = band_create();
-  band_21->type = iir_ls;
-  band_21->bandwidth = 0;
-  band_21->frequency = 200;
-  band_21->gain = -10;
-  band_get_coef(band_21);
-  profile_add_band( profile2, band_21 );
-
-  band_t *band_22 = band_create();
-  band_22->type = iir_hs;
-  band_22->bandwidth = 0;
-  band_22->frequency = 12000;
-  band_22->gain = 10;
-  band_get_coef(band_22);
-  profile_add_band( profile2, band_22 );
-
-  band_t *band_23 = band_create();
-  band_23->type = iir_notch;
-  band_23->bandwidth = 1000;
-  band_23->frequency = 3000;
-  band_23->gain = 10;
-  band_get_coef(band_23);
-  profile_add_band( profile2, band_23 );
-
-  profile_add( profile2 );
-
-  profile_use( profile->id);
-
 }
 
 /****************************** End Of Module *******************************/

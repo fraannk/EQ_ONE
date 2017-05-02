@@ -1,12 +1,11 @@
 /*****************************************************************************
 * University of Southern Denmark
-* Embedded Programming (EMP)
 *
 * MODULENAME.: buffers.c
 *
 * PROJECT....: EQ_ONE
 *
-* DESCRIPTION: 
+* DESCRIPTION: Module to handle dynamic buffers
 *
 * Change Log:
 *****************************************************************************
@@ -38,24 +37,35 @@ buffer_t buffers[BUFFERS_MAX];
 
 /*****************************   Functions   *******************************/
 INT8S buffer_newid()
+/*****************************************************************************
+*   Input    : -
+*   Output   : -
+*   Function : Returns the next available buffer id. Returns -1 if none avail.
+******************************************************************************/
 {
-  static INT8U next_id = 0;
+  static INT8U next_id = 0;         // Holds the next available id
   INT8S new_id;
 
-  if( next_id < BUFFERS_MAX )
+  if( next_id < BUFFERS_MAX )       // Check if next id is within max allowed
     new_id = next_id++;
   else
-    new_id = -1;
+    new_id = -1;                    //  Set -1 if none available
 
   return( new_id );
 }
 
 INT8U buffer_is_empty(INT8U id)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   return( buffers[id].head == buffers[id].tail ? 1 : 0 );
 }
 
 INT8U buffer_put(INT8U id, INT8U data)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   INT8U ret = 1;
 
@@ -70,6 +80,9 @@ INT8U buffer_put(INT8U id, INT8U data)
 }
 
 INT8U buffer_get(INT8U id, INT8U *data)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   INT8U ret = 0;
 
@@ -86,6 +99,9 @@ INT8U buffer_get(INT8U id, INT8U *data)
 }
 
 INT8S buffer_create(INT16U size)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   INT8U id = buffer_newid();
 

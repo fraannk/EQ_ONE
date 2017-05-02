@@ -18,8 +18,8 @@
 *                PA2  (SCK)
 *                PA3  (CS)
 *                PA5  (SDA)
-*                PE1  (LDAC)    // Todo:implement
-*                PE2  (SHDN)    // Todo:implement
+*                PE1  (LDAC)    // Todo:Not yet implemented
+*                PE2  (SHDN)    // Todo:Not yet implemented
 *
 *              EMP Mode (with #define EMP) for on board audio circuit
 *                in         PE5 (AIN8)    ADC0
