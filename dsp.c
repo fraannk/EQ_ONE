@@ -69,11 +69,16 @@ INT8U active_band_temp=0;
 
 FP32 dsp_filter_amplitude(INT16U frequency)
 {
-  FP32  num_real[active_band],num_imag[active_band],
-        denom_real[active_band], denom_imag[active_band],
-        num[active_band], denom[active_band],result,Omega;
+  FP32  num_real[active_band],
+        num_imag[active_band],
+        denom_real[active_band],
+        denom_imag[active_band],
+        num[active_band],
+        denom[active_band],
+        result = 1,
+        Omega;
   Omega = (2*PI*((FP32)frequency))*(1/SAMPLE_RATE);
-  result = 1;
+
   for(INT8U i=0; i < active_band;i++)
   {
     num_real[i] = B[i][0] + B[i][1]*cos(Omega) + B[i][2]*cos(2*Omega);
@@ -85,6 +90,22 @@ FP32 dsp_filter_amplitude(INT16U frequency)
     result *= num[i]/denom[i];
   }
   return (20*log10(result));
+}
+
+void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size)
+{
+  FP32 log_steps,f;
+  log_steps = (log10(20000.0) - log10(20.0))/((FP32)2.0*size);
+  INT8U i,j =0;
+  for(i=0 ; i < 2*size; i++)
+  {
+    if( i % 2 != 0) // odd number½
+    {
+      f = log10(20.0) + i*log_steps;
+      frequency_arr[j] = pow(10.0,f);
+      j++;
+    }
+  }
 }
 
 void dsp_mode_float()
