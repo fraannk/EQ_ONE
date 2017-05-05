@@ -56,6 +56,9 @@ void dsp_mode_float();
 void dsp_mode_integer();
 void dsp_mode_fixed();
 
+
+FP32 dsp_filter_amplitude(INT16U frequency);
+
 void iir_init_dsp_states(void);
 /*****************************************************************************
 *   Input    : none
