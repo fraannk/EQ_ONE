@@ -72,7 +72,7 @@ INT8U task_get_priority_ticks(TASK_PRIORITY priority )
   return( ticks );
 }
 
-void task_start(char *name,
+INT8U task_start(char *name,
                 TASK_PRIORITY priority ,
                 void (*task)(INT8U, INT8U, TASK_EVENT, INT8U))
 {
@@ -88,13 +88,27 @@ void task_start(char *name,
   task_pool[id].event = TE_RESET;
   task_pool[id].runtime_min = ~0;
   task_pool[id].runtime_max = 0;
+
+  return( id );
+}
+
+void task_stop(INT8U task_id)
+{
+  if( task_id < TASK_POOL_MAX )
+    task_pool[task_id].condition = TC_STOPPED;
+}
+
+void task_resume(INT8U task_id)
+{
+  if( task_id < TASK_POOL_MAX )
+    task_pool[task_id].condition = TC_IDLE;
 }
 
 void scheduler_init()
 {
   for( INT8U i = 0; i < TASK_POOL_MAX; i++ )
   {
-    task_pool[i].condition = TC_STOPPED;
+    task_pool[i].condition = TC_EMPTY;
     task_pool[i].event = TE_NOEVENT;
     task_pool[i].name = "\n";
     task_pool[i].id = i;
@@ -141,7 +155,7 @@ void task_status( FILE file_handler )
 
   for(INT8U i = 0 ; i < TASK_POOL_MAX; i++)
   {
-    if(task_pool[i].condition != TC_STOPPED)
+    if(task_pool[i].condition != TC_EMPTY)
     {
 
       gfprintf(file_handler, "%02d %7d %7d ",
@@ -164,6 +178,8 @@ void task_status( FILE file_handler )
           break;
         case TC_WAIT:
           gfprintf(file_handler, "WAIT      ");
+          break;
+        default:
           break;
       }
       switch (task_pool[i].priority)
@@ -195,50 +211,51 @@ void scheduler()
       debug_pins_high(DEBUG_P3);
       ticks=0;
       current_task = task_pool ;
-      while( (*current_task).condition != TC_STOPPED )
+      while( current_task->condition != TC_EMPTY )
       {
-        // Handle TC_WAIT condition
-        if( (*current_task).condition == TC_WAIT )
+        if( current_task->condition != TC_STOPPED)
         {
-          if( (*current_task).timer )
-            (*current_task).timer--;
+          // Handle TC_WAIT condition
+          if( current_task->condition == TC_WAIT )
+          {
+            if( current_task->timer )
+              current_task->timer--;
+            else
+            {
+              current_task->event = TE_TIMEOUT ;
+              current_task->condition = TC_READY;
+              current_task->ticks =
+                  task_get_priority_ticks((*current_task).priority);
+            }
+          }
           else
           {
-            (*current_task).event = TE_TIMEOUT ;
-            (*current_task).condition = TC_READY;
-            (*current_task).ticks =
-                task_get_priority_ticks((*current_task).priority);
+            if( current_task->ticks )
+              current_task->ticks--;
+            else
+            {
+              current_task->condition = TC_READY;
+              current_task->ticks =
+                  task_get_priority_ticks(current_task->priority);
+            }
           }
-        }
-        else
-        {
-          if( (*current_task).ticks )
-            (*current_task).ticks--;
-          else
-          {
-            (*current_task).condition = TC_READY;
-            (*current_task).ticks =
-                task_get_priority_ticks((*current_task).priority);
-          }
-        }
 
-        if( (*current_task).condition == TC_READY )
-        {
-          (*current_task).condition = TC_RUNNING;
-          systick_touch();
-          //timer_set(0);
-          (*current_task).task( (*current_task).id,
-                                (*current_task).state,
-                                (*current_task).event,
+          if( current_task->condition == TC_READY )
+          {
+            current_task->condition = TC_RUNNING;
+            systick_touch();
+            current_task->task( current_task->id,
+                                current_task->state,
+                                current_task->event,
                                 0);
-          //INT32U runtime = timer_get();
-          INT32U runtime =  systick_touch();
-          if ( (*current_task).runtime_min > runtime )
-            (*current_task).runtime_min = runtime;
-          if ( (*current_task).runtime_max < runtime )
-            (*current_task).runtime_max = runtime;
-          if( (*current_task).condition == TC_RUNNING )
-            (*current_task).condition = TC_IDLE;
+            INT32U runtime =  systick_touch();
+            if ( current_task->runtime_min > runtime )
+              current_task->runtime_min = runtime;
+            if ( current_task->runtime_max < runtime )
+              current_task->runtime_max = runtime;
+            if( current_task->condition == TC_RUNNING )
+              current_task->condition = TC_IDLE;
+          }
         }
         current_task++;
       }

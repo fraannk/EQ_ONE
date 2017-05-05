@@ -30,13 +30,15 @@
 #include "file.h"
 #include "gfstring.h"
 #include "shell.h"
+#include "display.h"
 
 /*****************************    Defines    *******************************/
 
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-
+extern INT8U display_status_task_id;
+extern INT8U display_profile_task_id;
 /*****************************   Functions   *******************************/
 
 void status( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
@@ -82,7 +84,13 @@ int main( void )
   task_start("UART_RX", TP_HIGH, uart0_rx_task);
   task_start("UART_TX", TP_HIGH, uart0_tx_task);
   task_start("Shell", TP_MEDIUM, shell);
-  task_start("EQ-Status", TP_LOW, equalizer_lcd_task);
+  //task_start("Display", TP_LOW, display_task);
+
+  display_status_task_id = task_start("EQ-Status", TP_LOW, equalizer_lcd_task);
+  //display_profile_task_id = task_start("EQ-profile", TP_LOW, equalizer_lcd_profile_task );
+
+  task_stop(display_profile_task_id);
+
   task_start("LCD", TP_HIGH, lcd_buffer_task);
   scheduler();
 

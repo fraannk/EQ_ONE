@@ -21,6 +21,7 @@
 
 /***************************** Include files *******************************/
 #include "emp_type.h"
+#include "scheduler.h"
 
 /*****************************    Defines    *******************************/
 
@@ -32,6 +33,7 @@
 /*************************  Function interfaces ****************************/
 
 void eq_build_display(INT8U levels[], INT8U *buffer);
+void display_task ( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
 
 
 /****************************** End Of Module *******************************/
