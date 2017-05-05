@@ -58,6 +58,7 @@ void dsp_mode_fixed();
 
 
 FP32 dsp_filter_amplitude(INT16U frequency);
+void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size);
 
 void iir_init_dsp_states(void);
 /*****************************************************************************

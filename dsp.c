@@ -90,7 +90,23 @@ FP32 dsp_filter_amplitude(INT16U frequency)
     denom[i] =sqrt(denom_real[i]*denom_real[i] + denom_imag[i]*denom_imag[i]) ;
     result *= num[i]/denom[i];
   }
-  return ( 20 * log10(result) );
+  return (20*log10(result));
+}
+
+void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size)
+{
+  FP32 log_steps,f;
+  log_steps = (log10(20000.0) - log10(20.0))/((FP32)2.0*size);
+  INT8U i,j =0;
+  for(i=0 ; i < 2*size; i++)
+  {
+    if( i % 2 != 0) // odd number½
+    {
+      f = log10(20.0) + i*log_steps;
+      frequency_arr[j] = pow(10.0,f);
+      j++;
+    }
+  }
 }
 
 void dsp_mode_float()
