@@ -32,7 +32,7 @@
 /*****************************    Defines    *******************************/
 typedef struct band_s{
   INT8U            id;
-  INT16S           gain;
+  FP32             gain;            // dB
   INT16U           frequency;
   INT16U           bandwidth;
   iir_filter_type  type;
@@ -45,6 +45,7 @@ typedef struct band_s{
 typedef struct ep {
   INT8U      id;
   char       name[40];
+  FP32       gain;                  // dB
   band_t     *band;
   struct ep  *prev_profile;
   struct ep  *next_profile;
@@ -125,6 +126,8 @@ void profile_use(INT8U id)
 
     iir_filter_clear();
 
+    iir_filter_master_gain( profile->gain );
+
     if(profile->band)
     {
       band_t *band = profile->band;
@@ -182,6 +185,7 @@ ep_t* profile_create()
 {
   ep_t *eq_profile = (ep_t*)malloc(sizeof(ep_t));
   eq_profile->id = profile_next_id();
+  eq_profile->gain = 0;
   eq_profile->next_profile = NULL;
   eq_profile->prev_profile = NULL;
   eq_profile->band = NULL;

@@ -287,6 +287,13 @@ BOOLEAN iir_filter_clear()
   return TRUE;
 }
 
+BOOLEAN iir_filter_master_gain( FP32 gain )
+{
+  //TODO: add master gain to current dsp profile
+
+  return TRUE;
+}
+
 BOOLEAN iir_filter_add(coef_t coef)
 {
   INT8U i;

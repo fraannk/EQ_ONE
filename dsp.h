@@ -120,6 +120,9 @@ BOOLEAN iir_filter_clear(void);
 *   Function : clears temp coefficient matrix,
 ******************************************************************************/
 
+BOOLEAN iir_filter_master_gain( FP32 gain );
+// TODO: add comment
+
 BOOLEAN iir_filter_add(coef_t coef);
 /*****************************************************************************
 *   Input    : coefficients
