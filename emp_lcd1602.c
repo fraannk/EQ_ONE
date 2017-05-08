@@ -172,6 +172,9 @@ void lcd_clear()
 {
   for(INT8U i = 0; i < LCD_BUF_SIZE; i++ )
     lcd_display_buffer[i] = 0x20;         // Clear with space
+  buffer_x = 0;
+  buffer_y = 0;
+  buffer_offset = 0;
 }
 
 void lcd_write(char *str)
@@ -274,7 +277,7 @@ void lcd_init()
   lcd_direct_write_instruction(0b00001100);
 
   // Load custom font to LCD CGRAM
-  lcd_set_custom_font_eq();
+  lcd_set_custom_font2_eq();
 
   // set cursor to 0,0
   lcd_direct_set_cursor(0,0);

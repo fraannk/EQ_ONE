@@ -44,6 +44,7 @@ void lcd_write(char *str);
 void lcd_write_char(char ch);
 void lcd_set_custom_font();
 void lcd_set_custom_font_eq();
+void lcd_set_custom_font2_eq();
 
 
 /****************************** End Of Module *******************************/

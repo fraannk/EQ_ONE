@@ -58,6 +58,9 @@ typedef enum{
 const char eq_bars[2][16] = { {32,32,32,32,32,32,32,32, 0, 1, 2, 3, 4, 5, 6, 7},
                               { 0, 1, 2, 3, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7} };
 
+const char eq_profil[2][16] = { {32,32,32,32,32,32,32,32, 0, 1, 2, 3, 4, 5, 6, 7},
+                                { 0, 1, 2, 3, 4, 5, 6, 7,32,32,32,32,32,32,32,32} };
+
 /*****************************   Variables   *******************************/
 // Equalizer state, default off
 state_t equalizer_state = OFF;
@@ -71,6 +74,8 @@ INT32U audio_int_time = 0;
 
 // Sample holds the current sample filled in by the sample_handler
 sample_type sample;
+
+INT16U eq_display_freq_log[16];
 
 /*****************************   Functions   *******************************/
 ep_t *profile_by_id(INT8U id)
@@ -268,6 +273,24 @@ void profile_add_band( ep_t *profile, band_t *band )
   }
 }
 
+void equalizer_lcd_profile_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+{
+  INT16U amp[16];
+
+  for( INT8U i = 0 ; i < 16; i++)
+    amp[i] = (INT16U)dsp_filter_amplitude( eq_display_freq_log[ i ]  );
+
+
+    lcd_set_cursor( 0, 0);
+
+    char b[6];
+    lcd_write( itoa(amp[0], b) );
+    //lcd_write_char( eq_profil[0][(INT8U)amp] );
+    //lcd_set_cursor( state, 1);
+    //lcd_write_char( eq_profil[1][(INT8U)amp] );
+
+}
+
 void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
   INT8U level_left;
@@ -422,6 +445,10 @@ void equalizer_init()
 {
   equalizer_profiles_setup();
   profile_use( 0);
+
+  // Initialize the frequency bin to be used on the profile display
+  dsp_filter_log_freq( eq_display_freq_log, 16 );
+
 
   // Turn audio on
   line_in( ON );

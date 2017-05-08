@@ -38,11 +38,12 @@ typedef enum{
 } TASK_PRIORITY;
 
 typedef enum{
-  TC_STOPPED  = 0x0,
-  TC_IDLE     = 0x1,
-  TC_READY    = 0x2,
-  TC_RUNNING  = 0x4,
-  TC_WAIT     = 0x8
+  TC_EMPTY    = 0x0,
+  TC_STOPPED  = 0x1,
+  TC_IDLE     = 0x2,
+  TC_READY    = 0x4,
+  TC_RUNNING  = 0x8,
+  TC_WAIT     = 0x16
 } TASK_CONDITION;
 
 typedef enum{
@@ -57,9 +58,13 @@ typedef enum{
 
 /*************************  Function interfaces ****************************/
 
-void task_start(char *name, TASK_PRIORITY priority , void (*task)(INT8U, INT8U, TASK_EVENT, INT8U));
+INT8U task_start(char *name,
+                 TASK_PRIORITY priority ,
+                 void (*task)(INT8U, INT8U, TASK_EVENT, INT8U));
 
 void task_wait(INT16U millisec);
+void task_stop(INT8U task_id);
+void task_resume(INT8U task_id);
 
 void task_set_state(INT8U state);
 void task_clear_event();

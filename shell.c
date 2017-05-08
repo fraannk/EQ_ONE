@@ -28,6 +28,7 @@
 #include "equalizer.h"
 #include "gfstring.h"
 #include <string.h>
+#include "display.h"
 
 
 /*****************************    Defines    *******************************/
@@ -41,6 +42,8 @@ typedef enum{
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
+extern INT8U display_status_task_id;
+extern INT8U display_profile_task_id;
 
 /*****************************   Functions   *******************************/
 char *get_cmd(char *cmd_line)
@@ -139,6 +142,16 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 
               if( cmd_compare(cmd, "ps")  )
                 task_status(COM1);
+              else if( cmd_compare( cmd, "t0") )
+              {
+                task_stop( display_status_task_id );
+                task_resume( display_profile_task_id );
+              }
+              else if( cmd_compare( cmd, "t1") )
+              {
+                task_stop( display_profile_task_id );
+                task_resume( display_status_task_id );
+              }
               else if( cmd_compare(cmd, "eq")  )
                 equalizer_onoff();
               else if( cmd_compare(cmd, "p0") )
