@@ -69,27 +69,26 @@ INT8U active_band_temp=0;
 
 FP32 dsp_filter_amplitude(INT16U frequency)
 {
-  FP32  num_real[active_band],
-        num_imag[active_band],
-        denom_real[active_band],
-        denom_imag[active_band],
-        num[active_band],
-        denom[active_band],
+  FP32  num_real,
+        num_imag,
+        denom_real,
+        denom_imag,
+        num,
+        denom,
         result = 1,
         Omega;
-  Omega = (2*PI*((FP32)frequency))*(1/SAMPLE_RATE);
-
-  for(INT8U i=0; i < active_band;i++)
+  Omega = (2.0*PI*((FP32)frequency))*(1.0/SAMPLE_RATE);
+  for(INT8U i=0; i < active_band - 1;i++)
   {
-    num_real[i] = B[i][0] + B[i][1]*cos(Omega) + B[i][2]*cos(2*Omega);
-    num_imag[i] = B[i][1]*sin(Omega) + B[i][1]*sin(2*Omega);
-    denom_real[i] = A[i][0] + A[i][1]*cos(Omega) + A[i][2]*cos(2*Omega);
-    denom_imag[i] = A[i][1]*sin(Omega) + A[i][1]*sin(2*Omega);
-    num[i] =sqrt(num_real[i]*num_real[i] + num_imag[i]*num_imag[i]) ;
-    denom[i] =sqrt(denom_real[i]*denom_real[i] + denom_imag[i]*denom_imag[i]) ;
-    result *= num[i]/denom[i];
+    num_real = B[i][0] + (B[i][1]*cos(Omega)) + (B[i][2]*cos(2.0*Omega));
+    num_imag = (B[i][1]*sin(Omega)) + (B[i][2]*sin(2.0*Omega));
+    denom_real = A[i][0] + (A[i][1]*cos(Omega)) + (A[i][2]*cos(2.0*Omega));
+    denom_imag = (A[i][1]*sin(Omega)) + (A[i][2]*sin(2.0*Omega)) ;
+    num =sqrt( (num_real*num_real) + (num_imag*num_imag) ) ;
+    denom =sqrt( (denom_real*denom_real) + (denom_imag*denom_imag) ) ;
+    result *= (num/denom);
   }
-  return (20*log10(result));
+  return (20.0*log10(result));
 }
 
 void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size)
