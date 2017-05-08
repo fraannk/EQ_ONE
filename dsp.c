@@ -77,15 +77,9 @@ FP32 dsp_filter_amplitude(INT16U frequency)
         denom,
         result = 1,
         Omega;
-<<<<<<< HEAD
+
   Omega = (2.0*PI*((FP32)frequency))*(1.0/SAMPLE_RATE);
   for(INT8U i=0; i < active_band - 1;i++)
-=======
-
-  Omega = (2*PI*((FP32)frequency))*(1/SAMPLE_RATE);
-
-  for(INT8U i=0; i < active_band;i++)
->>>>>>> branch 'master' of https://github.com/jorn/EQ_ONE.git
   {
     num_real = B[i][0] + (B[i][1]*cos(Omega)) + (B[i][2]*cos(2.0*Omega));
     num_imag = (B[i][1]*sin(Omega)) + (B[i][2]*sin(2.0*Omega));
