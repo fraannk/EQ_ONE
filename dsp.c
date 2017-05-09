@@ -56,6 +56,7 @@ FP32 B[MAX_BAND][3];      // coefficient buffer for iir_cascade()
 FP32 W[MAX_BAND][3];      // state variable buffer for iir_cascade()
 FP32 A_temp[MAX_BAND][3]; // coefficient buffer for temp values
 FP32 B_temp[MAX_BAND][3]; // coefficient buffer for temp values
+FP32 master_gain;
 
 param_t parameters;
 coef_t  temp_coef;
@@ -79,7 +80,7 @@ FP32 dsp_filter_amplitude(INT16U frequency)
         Omega;
 
   Omega = (2.0*PI*((FP32)frequency))*(1.0/SAMPLE_RATE);
-  for(INT8U i=0; i < active_band - 1;i++)
+  for(INT8U i=0; i < active_band ;i++)
   {
     num_real = B[i][0] + (B[i][1]*cos(Omega)) + (B[i][2]*cos(2.0*Omega));
     num_imag = (B[i][1]*sin(Omega)) + (B[i][2]*sin(2.0*Omega));
@@ -171,7 +172,7 @@ INT16U dsp_iir_filter( INT16U sample )            /* input sample */
         for(INT8U i=0; i< active_band;i++)
           out = iir_filter_sos( out, A[i] , B[i] , W[i] );
       }
-
+      out = master_gain*out;
       sample_out = (INT16U)(out+2048);
       break;
     case dm_integer:
@@ -289,7 +290,7 @@ BOOLEAN iir_filter_clear()
 BOOLEAN iir_filter_master_gain( FP32 gain )
 {
   //TODO: add master gain to current dsp profile
-
+  master_gain = pow(10.0, (gain/20.0));
   return TRUE;
 }
 
