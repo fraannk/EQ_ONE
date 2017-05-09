@@ -124,13 +124,13 @@ void scheduler_init()
 
 void task_wait(INT16U millisec)
 {
-  (*current_task).timer = millisec;
-  (*current_task).condition = TC_WAIT;
+  current_task->timer = millisec;
+  current_task->condition = TC_WAIT;
 }
 
 void task_set_state(INT8U state)
 {
-  (*current_task).state = state;
+  current_task->state = state;
 }
 
 void task_event( INT8U event )
@@ -209,7 +209,7 @@ void scheduler()
     while(ticks)
     {
       debug_pins_high(DEBUG_P3);
-      ticks=0;
+      ticks--;
       current_task = task_pool ;
       while( current_task->condition != TC_EMPTY )
       {

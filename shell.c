@@ -158,6 +158,10 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
                 profile_use(0);
               else if( cmd_compare(cmd, "p1") )
                 profile_use(1);
+              else if( cmd_compare(cmd, "p2") )
+                profile_use(2);
+              else if( cmd_compare(cmd, "p3") )
+                profile_use(3);
               else if( cmd_compare(cmd, "help") )
               {
                 gfprintf(COM1, "\r\nCommands : exit, eq, ps");

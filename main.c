@@ -84,10 +84,10 @@ int main( void )
   task_start("UART_RX", TP_HIGH, uart0_rx_task);
   task_start("UART_TX", TP_HIGH, uart0_tx_task);
   task_start("Shell", TP_MEDIUM, shell);
-  //task_start("Display", TP_LOW, display_task);
+  task_start("Display", TP_HIGH, display_task);
 
-  display_status_task_id = task_start("EQ-Status", TP_LOW, equalizer_lcd_task);
-  //display_profile_task_id = task_start("EQ-profile", TP_LOW, equalizer_lcd_profile_task );
+  display_status_task_id = task_start("EQ-Status", TP_MEDIUM, equalizer_lcd_task);
+  display_profile_task_id = task_start("EQ-profile", TP_MEDIUM, equalizer_lcd_profile_task );
 
   task_stop(display_profile_task_id);
 

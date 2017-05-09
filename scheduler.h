@@ -27,9 +27,9 @@
 
 /*****************************    Defines    *******************************/
 #define         TASK_POOL_MAX         128
-#define         TASK_LOW_PRIO_TICKS   50
-#define         TASK_MED_PRIO_TICKS   20
-#define         TASK_HIGH_PRIO_TICKS  2
+#define         TASK_LOW_PRIO_TICKS   10
+#define         TASK_MED_PRIO_TICKS   2
+#define         TASK_HIGH_PRIO_TICKS  1
 
 typedef enum{
   TP_LOW      = 0x1,

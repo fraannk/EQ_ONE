@@ -118,6 +118,12 @@ void band_set_coef(band_t *band)
 
 void profile_use(INT8U id)
 {
+  // store eq. state for later
+  state_t eq_state = equalizer_state;
+
+  // turn off the equalizer
+  equalizer_state = EQ_OFF;
+
   ep_t *profile = profile_by_id(id);
 
   if(profile)
@@ -140,6 +146,9 @@ void profile_use(INT8U id)
 
     iir_filter_use();
   }
+
+  // restore prev. eq state
+  equalizer_state = eq_state;
 }
 
 
@@ -279,20 +288,18 @@ void profile_add_band( ep_t *profile, band_t *band )
 
 void equalizer_lcd_profile_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
-  INT16U amp[16];
+  if(state > 15 )
+    state = 0;
 
-  for( INT8U i = 0 ; i < 16; i++)
-    amp[i] = (INT16U)dsp_filter_amplitude( eq_display_freq_log[ i ]  );
+  INT8U amp = (INT8U)((dsp_filter_amplitude( eq_display_freq_log[ state] / 2 )) + 8 );
+  amp = amp > 15 ? 15 : amp;
 
+  lcd_set_cursor( state, 0);
+  lcd_write_char( eq_profil[0][amp] );
+  lcd_set_cursor( state, 1);
+  lcd_write_char( eq_profil[1][amp] );
 
-    lcd_set_cursor( 0, 0);
-
-    char b[6];
-    lcd_write( itoa(amp[0], b) );
-    //lcd_write_char( eq_profil[0][(INT8U)amp] );
-    //lcd_set_cursor( state, 1);
-    //lcd_write_char( eq_profil[1][(INT8U)amp] );
-
+  task_set_state(++state);
 }
 
 void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
@@ -371,74 +378,156 @@ void equalizer_onoff()
   equalizer_state = equalizer_state == EQ_ON ? EQ_OFF : EQ_ON;
 }
 
+void equalizer_on()
+{
+  equalizer_state = EQ_ON;
+}
+
+void equalizer_off()
+{
+  equalizer_state = EQ_OFF;
+}
+
 void equalizer_profiles_setup()
 {
   band_t *band;
    ep_t *profile;
 
-   // Make first Profile
+   // Make p0 Profile
    profile = profile_create();
-   strcpy(profile->name, "No bass");
+   strcpy(profile->name, "Rock");
+   profile->gain = 0;
 
    band = band_create();
-   band->type = iir_ls;
-   band->bandwidth = 0;
-   band->frequency = 400;
-   band->gain = -40;
+   band->type = iir_peak;
+   band->frequency = 20;
+   band->bandwidth = 10;
+   band->gain = -5;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 60;
+   band->bandwidth = 10;
+   band->gain = 5;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 170;
+   band->bandwidth = 100;
+   band->gain = 4;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 310;
+   band->bandwidth = 30;
+   band->gain = -5;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 600;
+   band->bandwidth = 10;
+   band->gain = -6;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 6000;
+   band->bandwidth = 7000;
+   band->gain = -7;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 3000;
+   band->bandwidth = 1000;
+   band->gain = -4;
    band_get_coef(band);
    profile_add_band( profile, band );
 
    band = band_create();
    band->type = iir_hs;
-   band->bandwidth = 0;
-   band->frequency = 17000;
-   band->gain = -40;
-   band_get_coef(band);
-   profile_add_band( profile, band );
-
-   band = band_create();
-   band->type = iir_peak;
-   band->bandwidth = 1000;
-   band->frequency = 3000;
-   band->gain = 20;
-   band_get_coef(band);
-   profile_add_band( profile, band );
-
-   band = band_create();
-   band->type = iir_peak;
-   band->bandwidth = 1000;
-   band->frequency = 9000;
-   band->gain = 20;
+   band->bandwidth = 600;
+   band->frequency = 19000;
+   band->gain = -5;
    band_get_coef(band);
    profile_add_band( profile, band );
 
    profile_add( profile );
 
-   // Make second Profile
+   // Make p1 Profile
    profile = profile_create();
-   strcpy(profile->name, "More music");
+   strcpy(profile->name, "Classic");
+   profile->gain = 5;
 
    band = band_create();
-   band->type = iir_ls;
-   band->bandwidth = 0;
-   band->frequency = 200;
-   band->gain = -10;
+   band->type = iir_peak;
+   band->bandwidth = 10;
+   band->frequency = 20;
+   band->gain = -9;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 6000;
+   band->gain = -7;
+   band->bandwidth = 200;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 14000;
+   band->gain = -7;
+   band->bandwidth = 400;
    band_get_coef(band);
    profile_add_band( profile, band );
 
    band = band_create();
    band->type = iir_hs;
-   band->bandwidth = 0;
-   band->frequency = 12000;
-   band->gain = 10;
+   band->bandwidth = 500;
+   band->frequency = 16000;
+   band->gain = -9;
    band_get_coef(band);
    profile_add_band( profile, band );
 
+   profile_add( profile );
+
+   // Make P2 Profile
+   profile = profile_create();
+   strcpy(profile->name, "Megafon");
+   profile->gain = -10;
+
    band = band_create();
-   band->type = iir_notch;
-   band->bandwidth = 1000;
-   band->frequency = 3000;
-   band->gain = 10;
+   band->type = iir_peak;
+   band->frequency = 600;
+   band->gain = 25;
+   band->bandwidth = 200;
+   band_get_coef(band);
+   profile_add_band( profile, band );
+
+   profile_add( profile );
+
+   // Make P3 Profile
+   profile = profile_create();
+   strcpy(profile->name, "Test 1");
+   profile->gain = 0;
+
+   band = band_create();
+   band->type = iir_peak;
+   band->frequency = 1208;
+   band->gain = 20;
+   band->bandwidth = 100;
    band_get_coef(band);
    profile_add_band( profile, band );
 

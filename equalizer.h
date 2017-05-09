@@ -32,6 +32,8 @@
 /*************************  Function interfaces ****************************/
 void equalizer_init();
 void equalizer_onoff();
+void equalizer_on();
+void equalizer_off();
 void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
 void equalizer_lcd_profile_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
 void profile_use(INT8U id);

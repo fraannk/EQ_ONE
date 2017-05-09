@@ -90,7 +90,7 @@ FP32 dsp_filter_amplitude(INT16U frequency)
     denom =sqrt( (denom_real*denom_real) + (denom_imag*denom_imag) ) ;
     result *= (num/denom);
   }
-  return (20.0*log10(result));
+  return (20.0*log10(result*master_gain));
 }
 
 void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size)
@@ -173,6 +173,11 @@ INT16U dsp_iir_filter( INT16U sample )            /* input sample */
           out = iir_filter_sos( out, A[i] , B[i] , W[i] );
       }
       out = master_gain*out;
+      if( out > 2048 )
+        sample_out = 2048;
+      if( out < -2048)
+        sample_out = -2048;
+
       sample_out = (INT16U)(out+2048);
       break;
     case dm_integer:
