@@ -46,6 +46,7 @@ typedef struct ep {
   INT8U      id;
   char       name[40];
   FP32       gain;                  // dB
+  INT8U      spectrum[16];
   band_t     *band;
   struct ep  *prev_profile;
   struct ep  *next_profile;
@@ -286,20 +287,26 @@ void profile_add_band( ep_t *profile, band_t *band )
   }
 }
 
+void equalizer_create_spectrum(ep_t *profile )
+{
+  INT8U amp;
+
+  for( INT8U i = 0 ; i < 16; i++)
+  {
+    amp = (INT8U)((dsp_filter_amplitude( eq_display_freq_log[ i ] / 2 )) + 8 );
+    profile->spectrum[i] = amp > 15 ? 15 : amp;
+  }
+}
+
 void equalizer_lcd_profile_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 {
-  if(state > 15 )
-    state = 0;
-
-  INT8U amp = (INT8U)((dsp_filter_amplitude( eq_display_freq_log[ state] / 2 )) + 8 );
-  amp = amp > 15 ? 15 : amp;
-
-  lcd_set_cursor( state, 0);
-  lcd_write_char( eq_profil[0][amp] );
-  lcd_set_cursor( state, 1);
-  lcd_write_char( eq_profil[1][amp] );
-
-  task_set_state(++state);
+  for(INT8U i = 0; i < 16; i++)
+  {
+    lcd_set_cursor( i, 0);
+    lcd_write_char( eq_profil[ 0 ][ active_profil->spectrum[i] ] );
+    lcd_set_cursor( i, 1);
+    lcd_write_char( eq_profil[ 1 ][ active_profil->spectrum[i] ] );
+  }
 }
 
 void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
@@ -396,7 +403,7 @@ void equalizer_profiles_setup()
    // Make p0 Profile
    profile = profile_create();
    strcpy(profile->name, "Rock");
-   profile->gain = 0;
+   profile->gain = 5;
 
    band = band_create();
    band->type = iir_peak;
@@ -464,6 +471,10 @@ void equalizer_profiles_setup()
 
    profile_add( profile );
 
+   // Init spectrum for p0
+   profile_use( profile->id);
+   equalizer_create_spectrum( profile );
+
    // Make p1 Profile
    profile = profile_create();
    strcpy(profile->name, "Classic");
@@ -503,6 +514,10 @@ void equalizer_profiles_setup()
 
    profile_add( profile );
 
+   // Init spectrum for p1
+   profile_use( profile->id);
+   equalizer_create_spectrum( profile );
+
    // Make P2 Profile
    profile = profile_create();
    strcpy(profile->name, "Megafon");
@@ -518,6 +533,10 @@ void equalizer_profiles_setup()
 
    profile_add( profile );
 
+   // Init spectrum for p2
+   profile_use( profile->id);
+   equalizer_create_spectrum( profile );
+
    // Make P3 Profile
    profile = profile_create();
    strcpy(profile->name, "Test 1");
@@ -532,16 +551,19 @@ void equalizer_profiles_setup()
    profile_add_band( profile, band );
 
    profile_add( profile );
+
+   // Init spectrum for p3
+   profile_use( profile->id);
+   equalizer_create_spectrum( profile );
 }
 
 void equalizer_init()
 {
-  equalizer_profiles_setup();
-  profile_use( 0);
-
   // Initialize the frequency bin to be used on the profile display
   dsp_filter_log_freq( eq_display_freq_log, 16 );
 
+  equalizer_profiles_setup();
+  profile_use( 0);
 
   // Turn audio on
   line_in( ON );
