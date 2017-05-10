@@ -413,163 +413,351 @@ void equalizer_off()
 void equalizer_profiles_setup()
 {
   band_t *band;
-   ep_t *profile;
+  ep_t *profile;
 
-   // Make p0 Profile
-   profile = profile_create();
-   strcpy(profile->name, "Rock");
-   profile->gain = 5;
+  // Make p0 Profile
+  profile = profile_create();
+  strcpy(profile->name, "Rock");
+  profile->gain = 5;
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 20;
-   band->bandwidth = 10;
-   band->gain = -5;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 20;
+  band->bandwidth = 10;
+  band->gain = -5;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 60;
-   band->bandwidth = 10;
-   band->gain = 5;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 60;
+  band->bandwidth = 10;
+  band->gain = 5;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 170;
-   band->bandwidth = 100;
-   band->gain = 4;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 170;
+  band->bandwidth = 100;
+  band->gain = 4;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 310;
-   band->bandwidth = 30;
-   band->gain = -5;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 310;
+  band->bandwidth = 30;
+  band->gain = -5;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 600;
-   band->bandwidth = 10;
-   band->gain = -6;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 600;
+  band->bandwidth = 10;
+  band->gain = -6;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 6000;
-   band->bandwidth = 7000;
-   band->gain = -7;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 6000;
+  band->bandwidth = 7000;
+  band->gain = -7;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 3000;
-   band->bandwidth = 1000;
-   band->gain = -4;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 3000;
+  band->bandwidth = 1000;
+  band->gain = -4;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_hs;
-   band->bandwidth = 600;
-   band->frequency = 19000;
-   band->gain = -5;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_hs;
+  band->bandwidth = 600;
+  band->frequency = 19000;
+  band->gain = -5;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   profile_add( profile );
+  profile_add( profile );
 
-   // Init spectrum for p0
-   profile_use( profile->id);
-   equalizer_create_spectrum( profile );
+  // Init spectrum for p0
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
 
-   // Make p1 Profile
-   profile = profile_create();
-   strcpy(profile->name, "Classic");
-   profile->gain = 5;
+  // Make p1 Profile
+  profile = profile_create();
+  strcpy(profile->name, "Classic");
+  profile->gain = 5;
 
-   band = band_create();
-   band->type = iir_peak;
-   band->bandwidth = 10;
-   band->frequency = 20;
-   band->gain = -9;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->bandwidth = 10;
+  band->frequency = 20;
+  band->gain = -9;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 6000;
-   band->gain = -7;
-   band->bandwidth = 200;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 6000;
+  band->gain = -7;
+  band->bandwidth = 200;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 14000;
-   band->gain = -7;
-   band->bandwidth = 400;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 14000;
+  band->gain = -7;
+  band->bandwidth = 400;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   band = band_create();
-   band->type = iir_hs;
-   band->bandwidth = 500;
-   band->frequency = 16000;
-   band->gain = -9;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_hs;
+  band->bandwidth = 500;
+  band->frequency = 16000;
+  band->gain = -9;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   profile_add( profile );
+  profile_add( profile );
 
-   // Init spectrum for p1
-   profile_use( profile->id);
-   equalizer_create_spectrum( profile );
+  // Init spectrum for p1
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
 
-   // Make P2 Profile
-   profile = profile_create();
-   strcpy(profile->name, "Megafon");
-   profile->gain = -10;
+  // Make P2 Profile
+  profile = profile_create();
+  strcpy(profile->name, "Megafon");
+  profile->gain = -10;
 
-   band = band_create();
-   band->type = iir_peak;
-   band->frequency = 600;
-   band->gain = 25;
-   band->bandwidth = 200;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 600;
+  band->gain = 25;
+  band->bandwidth = 200;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   profile_add( profile );
+  profile_add( profile );
 
-   // Init spectrum for p2
-   profile_use( profile->id);
-   equalizer_create_spectrum( profile );
+  // Init spectrum for p2
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
 
-   // Make P3 Profile
-   profile = profile_create();
-   strcpy(profile->name, "Test 1");
-   profile->gain = 0;
+  // Make P3 Profile
+  profile = profile_create();
+  strcpy(profile->name, "Test 1");
+  profile->gain = 0;
 
-   band = band_create();
-   band->type = iir_peak;
+  band = band_create();
+  band->type = iir_peak;
    band->frequency = 19;
    band->gain = 16;
-   band->bandwidth = 100;
-   band_get_coef(band);
-   profile_add_band( profile, band );
+  band->bandwidth = 100;
+  band_get_coef(band);
+  profile_add_band( profile, band );
 
-   profile_add( profile );
+  profile_add( profile );
 
-   // Init spectrum for p3
-   profile_use( profile->id);
-   equalizer_create_spectrum( profile );
+  // Init spectrum for p3
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+  // Make P4 Profile
+  profile = profile_create();
+  strcpy(profile->name, "Bass Boost");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 50;
+  band->gain = 6;
+  band->bandwidth = 60;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 170;
+  band->gain = 4;
+  band->bandwidth = 100;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 310;
+  band->gain = 4;
+  band->bandwidth = 100;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for p4
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+  // Make P5 Profile
+  profile = profile_create();
+  strcpy(profile->name, "High Boost");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 6000;
+  band->gain = 6;
+  band->bandwidth = 500;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 9000;
+  band->gain = 4;
+  band->bandwidth = 1000;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 16000;
+  band->gain = 4;
+  band->bandwidth = 2000;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for p5
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+
+  // Make P6 Profile
+  profile = profile_create();
+  strcpy(profile->name, "Bass/high Boost");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 50;
+  band->gain = 6;
+  band->bandwidth = 60;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 170;
+  band->gain = 4;
+  band->bandwidth = 100;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 310;
+  band->gain = 4;
+  band->bandwidth = 100;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 6000;
+  band->gain = 6;
+  band->bandwidth = 500;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 9000;
+  band->gain = 4;
+  band->bandwidth = 1000;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 16000;
+  band->gain = 4;
+  band->bandwidth = 2000;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for p6
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+
+  // Make P7 Profile
+  profile = profile_create();
+  strcpy(profile->name, "1k Notch ");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 6000;
+  band->gain = 6;
+  band->bandwidth = 500;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 9000;
+  band->gain = 4;
+  band->bandwidth = 1000;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 16000;
+  band->gain = 4;
+  band->bandwidth = 2000;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for p7
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+  // Make P8 Profile
+  profile = profile_create();
+  strcpy(profile->name, "EMP komp");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_hs;
+  band->frequency = 15915;
+  band->gain = 4.653;
+  band->bandwidth = 1;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for p8
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+
+
 }
 
 void equalizer_init()
