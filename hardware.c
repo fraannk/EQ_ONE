@@ -136,9 +136,14 @@ void audio_out(sample_type sample)
 #else
     // Set right channel outA
     static INT32U reg;
+
+    while( SSI0_SR_R & SSI_SR_BSY);
+
     reg = 0b0111 << 12;       // A, buffered, 1xGain, On
     reg |= sample.left;
     SSI0_DR_R = reg;
+
+    while( SSI0_SR_R & SSI_SR_BSY);
 
     reg = 0b1111 << 12;       // B, buffered, 1xGain, On
     reg |= sample.right;

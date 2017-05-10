@@ -77,7 +77,22 @@ INT32U audio_int_time = 0;
 // Sample holds the current sample filled in by the sample_handler
 sample_type sample;
 
-INT16U eq_display_freq_log[16];
+INT16U eq_display_freq_log[16] = { 19,
+                        31,
+                        49,
+                        77,
+                        121,
+                        192,
+                        303,
+                        478,
+                        756,
+                        1194,
+                        1886,
+                        2981,
+                        4710,
+                        7441,
+                        11758,
+                        18579 };
 
 /*****************************   Functions   *******************************/
 ep_t *profile_by_id(INT8U id)
@@ -544,8 +559,8 @@ void equalizer_profiles_setup()
 
    band = band_create();
    band->type = iir_peak;
-   band->frequency = 1208;
-   band->gain = 20;
+   band->frequency = 19;
+   band->gain = 16;
    band->bandwidth = 100;
    band_get_coef(band);
    profile_add_band( profile, band );
@@ -560,7 +575,7 @@ void equalizer_profiles_setup()
 void equalizer_init()
 {
   // Initialize the frequency bin to be used on the profile display
-  dsp_filter_log_freq( eq_display_freq_log, 16 );
+  //dsp_filter_log_freq( eq_display_freq_log, 16 );
 
   equalizer_profiles_setup();
   profile_use( 0);
