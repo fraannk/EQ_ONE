@@ -418,7 +418,7 @@ void equalizer_profiles_setup()
   // Make p0 Profile
   profile = profile_create();
   strcpy(profile->name, "Rock");
-  profile->gain = 5;
+  profile->gain = 0;
 
   band = band_create();
   band->type = iir_peak;

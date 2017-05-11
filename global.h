@@ -24,8 +24,8 @@
 /*****************************    Defines    *******************************/
 // Hardware
 // Use this #define to enable the EMP board
-#define EMP           // EMP do use on EMP board
-#define PWM
+//#define EMP           // EMP do use on EMP board
+//#define PWM
 
 #define CPU_F                 80000000      // Current MCU clock speed
 #define MS_PER_TICK           1             // Millisec per Ticks
