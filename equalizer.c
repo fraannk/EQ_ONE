@@ -709,25 +709,9 @@ void equalizer_profiles_setup()
 
   band = band_create();
   band->type = iir_peak;
-  band->frequency = 6000;
-  band->gain = 6;
-  band->bandwidth = 500;
-  band_get_coef(band);
-  profile_add_band( profile, band );
-
-  band = band_create();
-  band->type = iir_peak;
-  band->frequency = 9000;
-  band->gain = 4;
-  band->bandwidth = 1000;
-  band_get_coef(band);
-  profile_add_band( profile, band );
-
-  band = band_create();
-  band->type = iir_peak;
-  band->frequency = 16000;
-  band->gain = 4;
-  band->bandwidth = 2000;
+  band->frequency = 500;
+  band->gain = -25;
+  band->bandwidth = 100;
   band_get_coef(band);
   profile_add_band( profile, band );
 
