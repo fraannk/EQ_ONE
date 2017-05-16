@@ -740,7 +740,43 @@ void equalizer_profiles_setup()
   profile_use( profile->id);
   equalizer_create_spectrum( profile );
 
+  // Make P9 Profile
+  profile = profile_create();
+  strcpy(profile->name, "+5 dB HS");
+  profile->gain = 0;
 
+  band = band_create();
+  band->type = iir_hs;
+  band->frequency = 1;
+  band->gain = 5;
+  band->bandwidth = 1;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for P9
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+  // Make P10 Profile
+  profile = profile_create();
+  strcpy(profile->name, "-5 dB HS");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_hs;
+  band->frequency = 1;
+  band->gain = -5;
+  band->bandwidth = 1;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for P10
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
 
 }
 

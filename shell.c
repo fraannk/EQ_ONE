@@ -139,7 +139,6 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
           {
             if(cmd_index != 0)
             {
-
               if( cmd_compare(cmd, "ps")  )
                 task_status(COM1);
               else if( cmd_compare( cmd, "t0") )
@@ -172,6 +171,10 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
                 profile_use(7);
               else if( cmd_compare(cmd, "p8") )
                 profile_use(8);
+              else if( cmd_compare(cmd, "p9") )
+                profile_use(9);
+              else if( cmd_compare(cmd, "p10") )
+                profile_use(10);
               else if( cmd_compare(cmd, "help") )
               {
                 gfprintf(COM1, "\r\nCommands : exit, eq, ps");
