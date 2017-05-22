@@ -742,14 +742,14 @@ void equalizer_profiles_setup()
 
   // Make P9 Profile
   profile = profile_create();
-  strcpy(profile->name, "+5 dB HS");
+  strcpy(profile->name, "1k, 5db, 100bw");
   profile->gain = 0;
 
   band = band_create();
-  band->type = iir_hs;
-  band->frequency = 1;
+  band->type = iir_peak;
+  band->frequency = 1000;
   band->gain = 5;
-  band->bandwidth = 1;
+  band->bandwidth = 100;
   band_get_coef(band);
   profile_add_band( profile, band );
 
@@ -761,20 +761,58 @@ void equalizer_profiles_setup()
 
   // Make P10 Profile
   profile = profile_create();
-  strcpy(profile->name, "-5 dB HS");
+  strcpy(profile->name, "1k, -5db, 100bw");
   profile->gain = 0;
 
   band = band_create();
-  band->type = iir_hs;
-  band->frequency = 1;
+  band->type = iir_peak;
+  band->frequency = 1000;
   band->gain = -5;
-  band->bandwidth = 1;
+  band->bandwidth = 100;
   band_get_coef(band);
   profile_add_band( profile, band );
 
   profile_add( profile );
 
   // Init spectrum for P10
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+  // Make P11 Profile
+  profile = profile_create();
+  strcpy(profile->name, "1k, 7db, 100bw");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 1000;
+  band->gain = 7;
+  band->bandwidth = 100;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for P11
+  profile_use( profile->id);
+  equalizer_create_spectrum( profile );
+
+  // Make P12 Profile
+  profile = profile_create();
+  strcpy(profile->name, "1k, -7db, 100bw");
+  profile->gain = 0;
+
+  band = band_create();
+  band->type = iir_peak;
+  band->frequency = 1000;
+  band->gain = -7;
+  band->bandwidth = 100;
+  band_get_coef(band);
+  profile_add_band( profile, band );
+
+  profile_add( profile );
+
+  // Init spectrum for P12
   profile_use( profile->id);
   equalizer_create_spectrum( profile );
 
