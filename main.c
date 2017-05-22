@@ -6,7 +6,7 @@
 *
 * PROJECT....: EQ_ONE
 *
-* DESCRIPTION: 
+* DESCRIPTION: Default main module for EQ_ONE
 *
 * Change Log:
 *****************************************************************************
@@ -39,6 +39,7 @@
 /*****************************   Variables   *******************************/
 extern INT8U display_status_task_id;
 extern INT8U display_profile_task_id;
+
 /*****************************   Functions   *******************************/
 
 void status( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
@@ -86,12 +87,17 @@ int main( void )
   task_start("Shell", TP_MEDIUM, shell);
   task_start("Display", TP_HIGH, display_task);
 
+  // Display taskes used for view two changing LCD displays
   display_status_task_id = task_start("EQ-Status", TP_MEDIUM, equalizer_lcd_task);
   display_profile_task_id = task_start("EQ-profile", TP_MEDIUM, equalizer_lcd_profile_task );
 
+  // Stop one of the two display tasks
   task_stop(display_profile_task_id);
 
+
   task_start("LCD", TP_HIGH, lcd_buffer_task);
+
+  // start the scheduler
   scheduler();
 
   return(0);

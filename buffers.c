@@ -36,6 +36,7 @@ typedef struct{
 buffer_t buffers[BUFFERS_MAX];
 
 /*****************************   Functions   *******************************/
+
 INT8S buffer_newid()
 /*****************************************************************************
 *   Input    : -
@@ -69,7 +70,6 @@ INT8U buffer_put(INT8U id, INT8U data)
 {
   INT8U ret = 1;
 
-  //TODO : check if buffer is full
   buffers[id].data[buffers[id].head] = data;
   buffers[id].head++;
 

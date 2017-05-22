@@ -130,24 +130,28 @@ void audio_out(sample_type sample)
     INT32U mono = (sample.left + sample.right)>>2;
     PWM0_2_CMPA_R = (INT32U)(adc_pwm_ratio * mono);
 #else
+
 #ifdef PWM
     PWM0_0_CMPA_R = (INT32U)(adc_pwm_ratio * (sample.right));
     PWM0_0_CMPB_R = (INT32U)(adc_pwm_ratio * (sample.left));
 #else
-    // Set right channel outA
-    static INT32U reg;
+    INT32U val;
 
+    // Wait for SSI if busy
     while( SSI0_SR_R & SSI_SR_BSY);
 
-    reg = 0b0111 << 12;       // A, buffered, 1xGain, On
-    reg |= sample.left;
-    SSI0_DR_R = reg;
+    // Set left channel outA
+    val = 0b0111 << 12;       // A, buffered, 1xGain, On
+    val |= sample.left;       // add 12 bit left channel value
+    SSI0_DR_R = val;          // Write instruction to DAC
 
+    // Wait for SSI if busy
     while( SSI0_SR_R & SSI_SR_BSY);
 
-    reg = 0b1111 << 12;       // B, buffered, 1xGain, On
-    reg |= sample.right;
-    SSI0_DR_R = reg;
+    // Set right channel outB
+    val = 0b1111 << 12;       // B, buffered, 1xGain, On
+    val |= sample.right;      // add 12 bit right channel value
+    SSI0_DR_R = val;          // Write instruction to DAC
 #endif
 
 #endif
@@ -612,12 +616,12 @@ void enable_FPU()
 {
   INT32U reg;
 
-  reg = NVIC_CPAC_R;
-  reg |= (0xF << 20);
+  reg = NVIC_CPAC_R;    // Coprocessor Access  Control (CPAC) register
+  reg |= (0xF << 20);   // Set bits 20-23 to enable CP10 and CP11 coprocessors
   NVIC_CPAC_R = reg;
 
-  __asm__("DSB");
-  __asm__("ISB");
+  __asm__("DSB");       // Data Synchronisation Barrier
+  __asm__("ISB");       // Instruction Synchronisation Barrier
 }
 
 void init_debug_pins()
@@ -711,16 +715,16 @@ INT32U timer_get()
 void spi_init()
 {
 #ifndef EMP
-  // activate the SSI module clock for SSI0
+  // Activate the SSI module clock for SSI0
   bit_set( SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0 );
 
-  // activate GPIO port A click
+  // Activate GPIO port A click
   bit_set( SYSCTL_RCGCGPIO_R, SYSCTL_RCGCGPIO_R0);
 
   // Digital enable pins
   GPIO_PORTA_DEN_R |= (1<<2 | 1<<3 | 1<<4 | 1<<5);
 
-  // Direction
+  // Set direction to output for CLK, SS and TX pins
   GPIO_PORTA_DIR_R |= (1<<2 | 1<<3 | 1<<5);
 
   // GPIO PullUp Resistor (GPIOPUR)
@@ -729,7 +733,7 @@ void spi_init()
   // Enable the alternate function on PA2, PA3, PA4 & PA5, high==AFSEL
   GPIO_PORTA_AFSEL_R |= (1<<2 | 1<<3 | 1<<4 | 1<<5 );
 
-  // GPIO portcontrol,
+  // GPIO Portcontrol
   INT32U reg = GPIO_PORTA_PCTL_R;
   reg &= 0x00FFFF00;                             // Clear bits
   GPIO_PORTA_PCTL_R |= GPIO_PCTL_PA2_SSI0CLK
@@ -756,7 +760,7 @@ void spi_init()
   // The data size (DSS)
 
   bit_clear (SSI0_CR0_R, SSI_CR0_SPH);    // SPH = 0
-  bit_set (SSI0_CR0_R, SSI_CR0_SPO);    // SPO = 0
+  bit_set (SSI0_CR0_R, SSI_CR0_SPO);      // SPO = 0
   bit_clear (SSI0_CR0_R, 0b110000 );      // Freescale SPI Frame Format
   bit_set (SSI0_CR0_R, SSI_CR0_DSS_16);   // DDS = 16 bit
 
