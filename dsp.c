@@ -275,10 +275,14 @@ INT16U dsp_iir_filter( INT16U sample )            /* input sample */
 
 void iir_calc_coef_peak(FP32 *a,FP32 *b)
 {
-
   FP32 G,w_0,beta,G_B,W;
+<<<<<<< HEAD
   w_0 = ( 2.0* PI *  parameters.frequency / SAMPLE_RATE );
   W = ( parameters.bandwith*2.0*PI / SAMPLE_RATE );
+=======
+  w_0 = 2.0*PI*parameters.frequency * ( 1.0 / SAMPLE_RATE );
+  W = 2.0*PI*parameters.bandwith * ( 1.0 / SAMPLE_RATE );
+>>>>>>> branch 'master' of https://github.com/jorn/EQ_ONE.git
   G =  powf( 10.0, ( parameters.gain /20.0 ) );
   G_B = sqrtf((1.0 + G*G)/2.0);
   beta = sqrtf(((G_B*G_B) - 1.0)/((G*G) - (G_B*G_B)))*tanf(W/2.0);
@@ -288,16 +292,15 @@ void iir_calc_coef_peak(FP32 *a,FP32 *b)
   b[0] = ((1.0 + G*beta)/(1.0 + beta));
   b[1] = -2.0*((cos(w_0))/(1.0+beta));
   b[2] =((1.0 - G*beta)/(1.0 + beta));
-
 }
 
 void iir_calc_coef_hs(FP32 *a,FP32 *b)
 {
   FP32 G,w_0,beta,G_B,w_c;
-  G =  powf( 10.0, ( parameters.gain /20.0 ) );
+  G =  powf( 10.0, ( (parameters.gain/1.75) /20.0 ) );
   G_B = sqrtf((1.0 + G*G)/2.0);
   w_0 = PI;
-  w_c =2.0*PI * parameters.frequency * (1.0/SAMPLE_RATE);
+  w_c = 2.0*PI * parameters.frequency * (1.0/SAMPLE_RATE);
   beta = sqrtf((G_B*G_B - 1.0)/(G*G - G_B*G_B))*tanf((PI- w_c)/2.0);
   a[0] = 1.0;
   a[1] = -2.0*((1.0*cos(w_0))/(1.0 + beta));
@@ -313,7 +316,7 @@ void iir_calc_coef_ls(FP32 *a,FP32 *b)
   FP32 G,w_0,beta,G_B,w_c;
   G =  powf( 10.0, ( parameters.gain /20.0 ) );
   G_B = sqrtf((1.0 + G*G)/2.0);
-  w_c = 2.0 * PI*parameters.frequency *(1.0/SAMPLE_RATE);
+  w_c = 2.0*PI*parameters.frequency *(1.0/SAMPLE_RATE);
   beta = sqrtf((G_B*G_B - 1)/(G*G - G_B*G_B))*tanf((w_c )/2.0);
   w_0 = 0;
   a[0] = 1.0;
@@ -327,9 +330,14 @@ void iir_calc_coef_ls(FP32 *a,FP32 *b)
 void iir_set_param(FP32 BW,FP32 G,FP32 f_0,INT8U filter_type)
 {
   parameters.filter_type = filter_type;
-  parameters.bandwith = BW;
-  parameters.gain= G;
-  parameters.frequency = f_0;
+  parameters.bandwith = BW/2;
+  if (G < 0) {
+      parameters.gain = G*3.75;
+  } else {
+      parameters.gain = G*1.75;
+  }
+  //parameters.gain= G*1.75;
+  parameters.frequency = f_0/2;
 }
 
 void iir_get_param(FP32 *BW,FP32 *G,FP32 *f_0,INT8U *filter_type)
