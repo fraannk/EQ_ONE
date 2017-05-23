@@ -56,98 +56,22 @@ FP32 B[MAX_BAND][3];      // coefficient buffer for iir_cascade()
 FP32 W[MAX_BAND][3];      // state variable buffer for iir_cascade()
 FP32 A_temp[MAX_BAND][3]; // coefficient buffer for temp values
 FP32 B_temp[MAX_BAND][3]; // coefficient buffer for temp values
-FP32 master_gain;
+FP32 master_gain;         // master gain
 
-param_t parameters;
-coef_t  temp_coef;
+param_t parameters;       // parameters (frequency, bandwidth, gain)
+coef_t  temp_coef;        // temp coefficients for calculations
 BOOLEAN filter_is_on;
-INT8U active_band = 0;
-INT8U active_band_temp=0;
+INT8U active_band = 0;    // number of bands on the running equalizer
+INT8U active_band_temp=0; // number of bands on the temporary
 
-
-
-void iir_init_dsp_states(void);
-/*****************************************************************************
-*   Input    : none
-*   Output   : none
-*   Function : initialize dsp module
-******************************************************************************/
-
-
-FP32 iir_filter_sos(FP32 in,FP32 *a,FP32 *b,FP32 *states_sos);
-/*****************************************************************************
-*   Input    : Input sample
-*   Output   : filtered sample
-*   Function : filters input sample with a biquad filter
-******************************************************************************/
-
-void iir_calc_coef(FP32 *a,FP32 *b);
-/*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate biquad coefficients for parameter filter_type
-******************************************************************************/
-
-void iir_calc_coef_peak(FP32 *a,FP32 *b);
-/*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate peak/notch coefficients
-******************************************************************************/
-
-void iir_calc_coef_hs(FP32 *a,FP32 *b);
-/*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate high shelf coefficients
-******************************************************************************/
-
-void iir_calc_coef_ls(FP32 *a,FP32 *b);
-/*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate low shelf coefficients
-******************************************************************************/
-
-
-void iir_set_param(FP32 BW,FP32 G,FP32 f_0,INT8U filter_type);
-/*****************************************************************************
-*   Input    : BW (bandwidth), G (gain), f_0 (center/corner frequency), filter_type
-*   Output   : none
-*   Function : set parameters
-******************************************************************************/
-
-void iir_get_param(FP32 *BW,FP32 *G,FP32 *f_0,INT8U *filter_type);
-/*****************************************************************************
-*   Input    : BW (bandwidth), G (gain), f_0 (center/corner frequency), filter_type
-*   Output   : none
-*   Function : returns input arguments as call by reference
-******************************************************************************/
-
+// forward declarations
 void iir_filter_enable();
-/*****************************************************************************
-*   Input    : none
-*   Output   : none
-*   Function : enable the filter in iir_cascade()
-******************************************************************************/
-
 void iir_filter_disable();
-/*****************************************************************************
-*   Input    : none
-*   Output   : none
-*   Function : disnable the filter in iir_cascade()
-******************************************************************************/
-
 BOOLEAN filter_on();
-/*****************************************************************************
-*   Input    : none
-*   Output   : returns true if filter is on
-*   Function : checks if filter (iir_cascade() ) is on
-******************************************************************************/
-// TODO: add comments
 void dsp_mode_float();
 void dsp_mode_integer();
 void dsp_mode_fixed();
+
 
 /*****************************   Functions   *******************************/
 
@@ -208,6 +132,11 @@ void dsp_mode_fixed()
 }
 
 void iir_init_dsp_states()
+/*****************************************************************************
+*   Input    : none
+*   Output   : none
+*   Function : initialize dsp module
+******************************************************************************/
 {
   for(INT8U i=0; i < MAX_BAND; i++)
   {
@@ -223,6 +152,11 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
                     FP32 *a,            /* a coefficients */
                     FP32 *b,            /* b coefficients */
                     FP32 *states_sos)   /* sos states */
+/*****************************************************************************
+*   Input    : Input sample, coefficients, statebuffer
+*   Output   : filtered sample
+*   Function : filters input sample with a biquad filter
+******************************************************************************/
 {
   FP32 out = 0;
   // difference equation
@@ -274,15 +208,15 @@ INT16U dsp_iir_filter( INT16U sample )            /* input sample */
 }
 
 void iir_calc_coef_peak(FP32 *a,FP32 *b)
+/*****************************************************************************
+*   Input    : a coefficient, b coefficient (call by reference)
+*   Output   : none
+*   Function : calculate peak/notch coefficients
+******************************************************************************/
 {
   FP32 G,w_0,beta,G_B,W;
-<<<<<<< HEAD
-  w_0 = ( 2.0* PI *  parameters.frequency / SAMPLE_RATE );
-  W = ( parameters.bandwith*2.0*PI / SAMPLE_RATE );
-=======
   w_0 = 2.0*PI*parameters.frequency * ( 1.0 / SAMPLE_RATE );
   W = 2.0*PI*parameters.bandwith * ( 1.0 / SAMPLE_RATE );
->>>>>>> branch 'master' of https://github.com/jorn/EQ_ONE.git
   G =  powf( 10.0, ( parameters.gain /20.0 ) );
   G_B = sqrtf((1.0 + G*G)/2.0);
   beta = sqrtf(((G_B*G_B) - 1.0)/((G*G) - (G_B*G_B)))*tanf(W/2.0);
@@ -295,6 +229,11 @@ void iir_calc_coef_peak(FP32 *a,FP32 *b)
 }
 
 void iir_calc_coef_hs(FP32 *a,FP32 *b)
+/*****************************************************************************
+*   Input    : a coefficient, b coefficient (call by reference)
+*   Output   : none
+*   Function : calculate high shelf coefficients
+******************************************************************************/
 {
   FP32 G,w_0,beta,G_B,w_c;
   G =  powf( 10.0, ( (parameters.gain/1.75) /20.0 ) );
@@ -311,8 +250,12 @@ void iir_calc_coef_hs(FP32 *a,FP32 *b)
 }
 
 void iir_calc_coef_ls(FP32 *a,FP32 *b)
+/*****************************************************************************
+*   Input    : a coefficient, b coefficient (call by reference)
+*   Output   : none
+*   Function : calculate low shelf coefficients
+******************************************************************************/
 {
-
   FP32 G,w_0,beta,G_B,w_c;
   G =  powf( 10.0, ( parameters.gain /20.0 ) );
   G_B = sqrtf((1.0 + G*G)/2.0);
@@ -328,6 +271,11 @@ void iir_calc_coef_ls(FP32 *a,FP32 *b)
 }
 
 void iir_set_param(FP32 BW,FP32 G,FP32 f_0,INT8U filter_type)
+/*****************************************************************************
+*   Input    : BW (bandwidth), G (gain), f_0 (center/corner frequency), filter_type
+*   Output   : none
+*   Function : set parameters
+******************************************************************************/
 {
   parameters.filter_type = filter_type;
   parameters.bandwith = BW/2;
@@ -341,6 +289,11 @@ void iir_set_param(FP32 BW,FP32 G,FP32 f_0,INT8U filter_type)
 }
 
 void iir_get_param(FP32 *BW,FP32 *G,FP32 *f_0,INT8U *filter_type)
+/*****************************************************************************
+*   Input    : BW (bandwidth), G (gain), f_0 (center/corner frequency), filter_type
+*   Output   : none
+*   Function : returns input arguments as call by reference
+******************************************************************************/
 {
   *filter_type = parameters.filter_type;
   *BW = parameters.bandwith;
@@ -349,6 +302,11 @@ void iir_get_param(FP32 *BW,FP32 *G,FP32 *f_0,INT8U *filter_type)
 }
 
 void iir_calc_coef(FP32 a[],FP32 b[])
+/*****************************************************************************
+*   Input    : a coefficient, b coefficient (call by reference)
+*   Output   : none
+*   Function : calculate biquad coefficients for parameter filter_type
+******************************************************************************/
 {
 
   switch(parameters.filter_type)
@@ -435,14 +393,29 @@ coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth)
 }
 
 void iir_filter_enable()
+/*****************************************************************************
+*   Input    : none
+*   Output   : none
+*   Function : enable the filter in iir_cascade()
+******************************************************************************/
 {
   filter_is_on = TRUE ;
 }
 void iir_filter_disable()
+/*****************************************************************************
+*   Input    : none
+*   Output   : none
+*   Function : disnable the filter in iir_cascade()
+******************************************************************************/
 {
   filter_is_on = FALSE;
 }
 BOOLEAN filter_on()
+/*****************************************************************************
+*   Input    : none
+*   Output   : returns true if filter is on
+*   Function : checks if filter (iir_cascade() ) is on
+******************************************************************************/
 {
   return filter_is_on ? TRUE : FALSE;
 }
