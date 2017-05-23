@@ -1,20 +1,19 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded Programming (EMP)
-*
-* MODULENAME.: equalizer.c
-*
-* PROJECT....: EQ_ONE
-*
-* DESCRIPTION: Equalizer module
-*
-* Change Log:
-*****************************************************************************
-* Date    Id    Change
-* --------------------
-* 17. apr. 2017  jorn    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: equalizer.c
+ *
+ * PROJECT....: EQ_ONE
+ *
+ * DESCRIPTION: Equalizer module
+ *
+ * Change Log:
+ *****************************************************************************
+ * Date    Id    Change
+ * --------------------
+ * 17. apr. 2017  jorn    Module created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include "equalizer.h"
@@ -30,28 +29,31 @@
 #include "gfstring.h"
 
 /*****************************    Defines    *******************************/
+// Equalizer profile band data strucure
 typedef struct band_s{
-  INT8U            id;
-  FP32             gain;            // dB
-  INT16U           frequency;
-  INT16U           bandwidth;
-  iir_filter_type  type;
-  FP32             a_coeff[3];
-  FP32             b_coeff[3];
-  struct band_s    *prev_band;
-  struct band_s    *next_band;
+  INT8U            id;              // Band id
+  FP32             gain;            // Gain in dB
+  INT16U           frequency;       // Frequency in Hz
+  INT16U           bandwidth;       // Bandwidth in Hz
+  iir_filter_type  type;            // Filter type used on band
+  FP32             a_coeff[3];      // DSP calculated A coefficients
+  FP32             b_coeff[3];      // DSP calculated B coefficients
+  struct band_s    *prev_band;      // Pointer to prev. band
+  struct band_s    *next_band;      // Pointer to next. band
 } band_t;
 
+// Equalizer profile  data strucure
 typedef struct ep {
-  INT8U      id;
-  char       name[40];
-  FP32       gain;                  // dB
-  INT8U      spectrum[16];
-  band_t     *band;
-  struct ep  *prev_profile;
-  struct ep  *next_profile;
+  INT8U      id;                    // Equalizer profile id
+  char       name[40];              // Profile name
+  FP32       gain;                  // Master gain in dB
+  INT8U      spectrum[16];          // Stored equalizer spectrum
+  band_t     *band;                 // Pointer to first eq. band
+  struct ep  *prev_profile;         // Pointer to prev. eq. profile
+  struct ep  *next_profile;         // Pointer to next. eq. profile
 } ep_t;
 
+// Simple OnOff enum
 typedef enum{
   EQ_ON,
   EQ_OFF
@@ -77,25 +79,16 @@ INT32U audio_int_time = 0;
 // Sample holds the current sample filled in by the sample_handler
 sample_type sample;
 
-INT16U eq_display_freq_log[16] = { 19,
-                        31,
-                        49,
-                        77,
-                        121,
-                        192,
-                        303,
-                        478,
-                        756,
-                        1194,
-                        1886,
-                        2981,
-                        4710,
-                        7441,
-                        11758,
-                        18579 };
+INT16U eq_display_freq_log[16];
 
 /*****************************   Functions   *******************************/
+
 ep_t *profile_by_id(INT8U id)
+/*****************************************************************************
+ *   Input    : Profile id
+ *   Output   : Pointer to eq. profile or NULL
+ *   Function : Get a eq. profile by id
+ ******************************************************************************/
 {
   ep_t *profile = NULL;
   BOOLEAN found = FALSE;
@@ -120,6 +113,11 @@ ep_t *profile_by_id(INT8U id)
 }
 
 void band_set_coef(band_t *band)
+/*****************************************************************************
+ *   Input    : Pointer to a band
+ *   Output   : -
+ *   Function : Set stored filter coefficients on DSP module
+ ******************************************************************************/
 {
   coef_t coef;
   coef.a[0] = band->a_coeff[0];
@@ -133,6 +131,9 @@ void band_set_coef(band_t *band)
 }
 
 void profile_use(INT8U id)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   // store eq. state for later
   state_t eq_state = equalizer_state;
@@ -169,6 +170,11 @@ void profile_use(INT8U id)
 
 
 INT8U profile_next_id()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : Profile id
+ *   Function : Get the first free profile id
+ ******************************************************************************/
 {
   ep_t *current_ep = equalizer_profiles;
 
@@ -188,6 +194,11 @@ INT8U profile_next_id()
 }
 
 INT8U band_next_id(band_t *band)
+/*****************************************************************************
+ *   Input    : Pointer to a eq. band
+ *   Output   : Band id
+ *   Function : Get the first free band id
+ ******************************************************************************/
 {
   band_t *current_band = band;
 
@@ -207,6 +218,11 @@ INT8U band_next_id(band_t *band)
 }
 
 ep_t* profile_create()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : Pointer to an eq. profile
+ *   Function : Creates an empty eq. profile
+ ******************************************************************************/
 {
   ep_t *eq_profile = (ep_t*)malloc(sizeof(ep_t));
   eq_profile->id = profile_next_id();
@@ -218,6 +234,11 @@ ep_t* profile_create()
 }
 
 band_t* band_create()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : Pointer to an eq. band
+ *   Function : Creates an empty eq. band
+ ******************************************************************************/
 {
   band_t *band = (band_t *)malloc(sizeof(band_t));
   band->id = band_next_id(NULL);
@@ -233,6 +254,11 @@ band_t* band_create()
 }
 
 void band_get_coef(band_t *band )
+/*****************************************************************************
+ *   Input    : Pointer to an eq. band
+ *   Output   : -
+ *   Function : Fill out A and B coefficients from DSP module on eq. band
+ ******************************************************************************/
 {
   coef_t *coef  = iir_coef(band->type,
                            band->frequency,
@@ -249,6 +275,11 @@ void band_get_coef(band_t *band )
 
 
 ep_t *profile_last(ep_t *profile )
+/*****************************************************************************
+ *   Input    : Pointer to an eq. profile
+ *   Output   : Pointer to an eq. profile
+ *   Function : Find the last eq. profile and return its pointer
+ ******************************************************************************/
 {
   ep_t *current_profile = profile;
 
@@ -261,6 +292,11 @@ ep_t *profile_last(ep_t *profile )
 }
 
 band_t *band_last( band_t *band)
+/*****************************************************************************
+ *   Input    : Pointer to an eq. band
+ *   Output   : Pointer to an eq. band
+ *   Function : Find the last eq. band and return its pointer
+ ******************************************************************************/
 {
   band_t *current_band = band;
 
@@ -273,6 +309,11 @@ band_t *band_last( band_t *band)
 }
 
 void profile_add(ep_t *profile)
+/*****************************************************************************
+ *   Input    : Pointer to an eq. profile
+ *   Output   : -
+ *   Function : Add the profile to the list
+ ******************************************************************************/
 {
   if( equalizer_profiles )
   {
@@ -288,6 +329,11 @@ void profile_add(ep_t *profile)
 }
 
 void profile_add_band( ep_t *profile, band_t *band )
+/*****************************************************************************
+ *   Input    : A eq. profile and eq. band pointer
+ *   Output   : -
+ *   Function : Add the band to the profile
+ ******************************************************************************/
 {
   if(profile->band)
   {
@@ -303,6 +349,11 @@ void profile_add_band( ep_t *profile, band_t *band )
 }
 
 void equalizer_create_spectrum(ep_t *profile )
+/*****************************************************************************
+ *   Input    : Pointer to an eq. profile
+ *   Output   : -
+ *   Function : Get the calculated frequency spectrum for an eq. profile
+ ******************************************************************************/
 {
   INT8U amp;
 
@@ -314,6 +365,9 @@ void equalizer_create_spectrum(ep_t *profile )
 }
 
 void equalizer_lcd_profile_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   for(INT8U i = 0; i < 16; i++)
   {
@@ -325,6 +379,9 @@ void equalizer_lcd_profile_task( INT8U id, INT8U state, TASK_EVENT event, INT8U 
 }
 
 void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   INT8U level_left;
   INT8U level_right;
@@ -374,43 +431,74 @@ void equalizer_lcd_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 }
 
 extern void sample_handler()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Main function called by the NVIC
+ *            : This function handles the jobs related to audio in and out
+ ******************************************************************************/
 {
+  // Set debug pins for scope debugging
   debug_pins_toggle(DEBUG_P1);
   debug_pins_high(DEBUG_P2);
 
+  // Zero timer for cpu load calculations
   timer_set(0);
 
+  // Clear the interrupt flags
   pwm_clear_interrupt();
 
+  // Send last sample
   audio_out(sample);
+
+  // Get new sample
   audio_in(&sample);
 
+  // if eq. on then calculate filters on left and right channel
   if( equalizer_state == EQ_ON )
   {
     sample.left = dsp_iir_filter(sample.left);
     sample.right = dsp_iir_filter(sample.right);
   }
 
+  // set audio time used
   audio_int_time = timer_get();
+
+  // Set debug pins low for scope debugging
   debug_pins_low(DEBUG_P2);
 }
 
 void equalizer_onoff()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   equalizer_state = equalizer_state == EQ_ON ? EQ_OFF : EQ_ON;
 }
 
 void equalizer_on()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   equalizer_state = EQ_ON;
 }
 
 void equalizer_off()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   equalizer_state = EQ_OFF;
 }
 
 void equalizer_profiles_setup()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : This makes the complete setup off all default eq. profiles in
+ *              the equalizer module.
+ ******************************************************************************/
 {
   band_t *band;
   ep_t *profile;
@@ -559,8 +647,8 @@ void equalizer_profiles_setup()
 
   band = band_create();
   band->type = iir_peak;
-   band->frequency = 19;
-   band->gain = 16;
+  band->frequency = 19;
+  band->gain = 16;
   band->bandwidth = 100;
   band_get_coef(band);
   profile_add_band( profile, band );
@@ -819,11 +907,17 @@ void equalizer_profiles_setup()
 }
 
 void equalizer_init()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   // Initialize the frequency bin to be used on the profile display
-  //dsp_filter_log_freq( eq_display_freq_log, 16 );
+  dsp_filter_log_freq( eq_display_freq_log, 16 );
 
+  // Setup all default profiles
   equalizer_profiles_setup();
+
+  // Set active profile with id = 0
   profile_use( 0);
 
   // Turn audio on

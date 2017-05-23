@@ -1,21 +1,20 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded C Programming (ECP)
-*
-* MODULENAME.: emp_lcd1602.c
-*
-* PROJECT....: EMP
-*
-* DESCRIPTION: See module specification file (.h-file).
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 170210  JJA   Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: emp_lcd1602.c
+ *
+ * PROJECT....: EMP
+ *
+ * DESCRIPTION: LCD driver module
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 170210  JJA   Module created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include "emp_lcd1602.h"
@@ -28,9 +27,8 @@
 #include "string.h"
 #include "scheduler.h"
 
-
-
 /*****************************    Defines    *******************************/
+// Hardware configuration of LCD pins
 #define     LCD_DATA_PORT           GPIO_PORTC_DATA_R
 #define     LCD_DATA_DDR            GPIO_PORTC_DIR_R
 #define     LCD_DATA_EN             GPIO_PORTC_DEN_R
@@ -49,14 +47,25 @@
 typedef enum {HIGH, LOW} pin_state;
 
 /*****************************   Variables   *******************************/
+// Internal display buffer array
 INT8U lcd_display_buffer[LCD_BUF_SIZE];
+
+// Cursor position in display buffer
 INT8U buffer_x = 0;
 INT8U buffer_y = 0;
 INT8U buffer_offset = 0;
 
 /*****************************   Functions   *******************************/
+void lcd_set_custom_font();
+void lcd_set_custom_font_eq();
+void lcd_set_custom_font2_eq();
 
 void lcd_RS(pin_state pin)
+/*****************************************************************************
+ *   Input    : RS pin
+ *   Output   : -
+ *   Function : Set state of RS to LCD
+ ******************************************************************************/
 {
   if(pin == LOW)
     bit_clear(LCD_CTRL_PORT, 1<<LCD_RS_PIN);
@@ -65,6 +74,11 @@ void lcd_RS(pin_state pin)
 }
 
 void lcd_E(pin_state pin)
+/*****************************************************************************
+ *   Input    : E pin
+ *   Output   : -
+ *   Function : Set state of E to LCD
+ ******************************************************************************/
 {
   if(pin == LOW)
     bit_clear(LCD_CTRL_PORT, 1<<LCD_E_PIN);
@@ -73,6 +87,11 @@ void lcd_E(pin_state pin)
 }
 
 void lcd_write_nibble(INT8U byte)
+/*****************************************************************************
+ *   Input    : Byte to send (Uses only bit 4-7)
+ *   Output   : -
+ *   Function : Write high nibble to LCD
+ ******************************************************************************/
 {
   lcd_E(LOW);
 
@@ -98,6 +117,11 @@ void lcd_write_nibble(INT8U byte)
 }
 
 void lcd_direct_write_instruction(INT8U byte)
+/*****************************************************************************
+ *   Input    : Byte containing the instruction
+ *   Output   : -
+ *   Function : Write instruction directly to LCD
+ ******************************************************************************/
 {
   lcd_RS(LOW);
   lcd_E(LOW);
@@ -107,6 +131,11 @@ void lcd_direct_write_instruction(INT8U byte)
 }
 
 void lcd_direct_write_data(INT8U byte)
+/*****************************************************************************
+ *   Input    : Byte containing the data
+ *   Output   : -
+ *   Function : Write data directly to LCD
+ ******************************************************************************/
 {
   lcd_RS(HIGH);
   lcd_E(LOW);
@@ -116,6 +145,11 @@ void lcd_direct_write_data(INT8U byte)
 }
 
 void lcd_direct_write_data_nodelay(INT8U byte)
+/*****************************************************************************
+ *   Input    : Byte containing the data
+ *   Output   : -
+ *   Function : Write data directly to LCD without end delay
+ ******************************************************************************/
 {
   lcd_RS(HIGH);
   lcd_E(LOW);
@@ -124,6 +158,11 @@ void lcd_direct_write_data_nodelay(INT8U byte)
 }
 
 void lcd_direct_set_cursor(INT8U x, INT8U y)
+/*****************************************************************************
+ *   Input    : X, Y coordinates
+ *   Output   : -
+ *   Function : Set cursor directly on LCD
+ ******************************************************************************/
 {
   INT8U ddram_adress = 0x80;
   ddram_adress |= (y*0x40 + x);
@@ -131,6 +170,11 @@ void lcd_direct_set_cursor(INT8U x, INT8U y)
 }
 
 void lcd_direct_write_line(char *line)
+/*****************************************************************************
+ *   Input    : line containing pointer to char
+ *   Output   : -
+ *   Function : Write a line (string) directly to LCD
+ ******************************************************************************/
 {
   INT8U i = 0;
   while( line[i] != 0)
@@ -140,6 +184,11 @@ void lcd_direct_write_line(char *line)
 }
 
 void lcd_direct_clear(void)
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : CLears the LCD directly
+ ******************************************************************************/
 {
   // Clear entire display
   lcd_direct_write_instruction(0x01);
@@ -147,6 +196,11 @@ void lcd_direct_clear(void)
 }
 
 void lcd_direct_write_buffer(INT8U *buffer)
+/*****************************************************************************
+ *   Input    : Pointer to a display buffer
+ *   Output   : -
+ *   Function : Writes the complete display buffer directly to LCD
+ ******************************************************************************/
 {
   for(INT8U y=0; y < LCD_LINES; y++)
   {
@@ -159,6 +213,9 @@ void lcd_direct_write_buffer(INT8U *buffer)
 }
 
 void lcd_set_cursor(INT8U x, INT8U y)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   if(  y < LCD_LINES && x <= LCD_CHARS )
   {
@@ -169,6 +226,9 @@ void lcd_set_cursor(INT8U x, INT8U y)
 }
 
 void lcd_clear()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   for(INT8U i = 0; i < LCD_BUF_SIZE; i++ )
     lcd_display_buffer[i] = 0x20;         // Clear with space
@@ -178,6 +238,9 @@ void lcd_clear()
 }
 
 void lcd_write(char *str)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   if( sizeof(*str) < (LCD_BUF_SIZE - buffer_offset ) )
   {
@@ -188,12 +251,18 @@ void lcd_write(char *str)
 }
 
 void lcd_write_char(char ch)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   lcd_display_buffer[buffer_offset] = ch;
   buffer_offset++;
 }
 
 void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   if(state < LCD_BUF_SIZE)
   {
@@ -210,6 +279,9 @@ void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 }
 
 void lcd_init()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   // Set GPIOF on Run Mode Clock Gating Control Register PORTC 6 PORTD
   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R2 | SYSCTL_RCGCGPIO_R3;
@@ -284,6 +356,11 @@ void lcd_init()
 }
 
 void lcd_set_custom_font()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Set custom font set 0
+ ******************************************************************************/
 {
   lcd_direct_write_instruction(0x40);
   lcd_direct_write_data(0b10000);
@@ -308,6 +385,11 @@ void lcd_set_custom_font()
 }
 
 void lcd_set_custom_font_eq()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Set custom font set eq
+ ******************************************************************************/
 {
   // set start font at CGRAM addr. 0x0
   lcd_direct_write_instruction(0x40);
@@ -387,6 +469,11 @@ void lcd_set_custom_font_eq()
 }
 
 void lcd_set_custom_font2_eq()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Set custom font set eq2
+ ******************************************************************************/
 {
   // set start font at CGRAM addr. 0x0
   lcd_direct_write_instruction(0x40);

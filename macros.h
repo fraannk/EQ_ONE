@@ -1,24 +1,23 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded Programming (EMP)
-*
-* MODULENAME.: macros.h
-*
-* PROJECT....: emp_assign_3
-*
-* DESCRIPTION: 
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 15. mar. 2017	jorn    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: macros.h
+ *
+ * PROJECT....: EQ_ONE
+ *
+ * DESCRIPTION: Macro definitions
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 15. mar. 2017	jorn    Module created.
+ *
+ *****************************************************************************/
 
 #ifndef MACROS_H_
-  #define MACROS_H_
+#define MACROS_H_
 
 /***************************** Include files *******************************/
 #include <stdint.h>

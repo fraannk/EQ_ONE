@@ -1,20 +1,20 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded Programming (EMP)
-*
-* MODULENAME.: scheduler.c
-*
-* PROJECT....: EQ_ONE
-*
-* DESCRIPTION: Scheduler module for the EQ_ONE system
-*
-* Change Log:
-*****************************************************************************
-* Date    Id    Change
-* --------------------
-* 16. apr. 2017  jorn    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ * Embedded Programming (EMP)
+ *
+ * MODULENAME.: scheduler.c
+ *
+ * PROJECT....: EQ_ONE
+ *
+ * DESCRIPTION: Scheduler module for the EQ_ONE system
+ *
+ * Change Log:
+ *****************************************************************************
+ * Date    Id    Change
+ * --------------------
+ * 16. apr. 2017  jorn    Module created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include "scheduler.h"
@@ -28,6 +28,7 @@
 #include "systick.h"
 
 /*****************************    Defines    *******************************/
+// Task Control Block Data structure (TCB)
 typedef struct
 {
   TASK_CONDITION  condition;
@@ -47,18 +48,29 @@ typedef struct
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-extern INT16S ticks;
-tcb *current_task;
-tcb task_pool[TASK_POOL_MAX];
+extern INT16S ticks;              // sysTick
+
+tcb *current_task;                // Pointer to current task
+tcb task_pool[TASK_POOL_MAX];     // Task pool
 
 /*****************************   Functions   *******************************/
 INT8U task_new_id(void)
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : Task id
+ *   Function : Get the next free task id
+ ******************************************************************************/
 {
   static INT8U next_id = 0;
   return( next_id++ );
 }
 
 INT8U task_get_priority_ticks(TASK_PRIORITY priority )
+/*****************************************************************************
+ *   Input    : Priority enum
+ *   Output   : sysTick factor
+ *   Function : Get the priority sysTick factor
+ ******************************************************************************/
 {
   INT8U ticks;
   switch( priority )
@@ -73,8 +85,11 @@ INT8U task_get_priority_ticks(TASK_PRIORITY priority )
 }
 
 INT8U task_start(char *name,
-                TASK_PRIORITY priority ,
-                void (*task)(INT8U, INT8U, TASK_EVENT, INT8U))
+                 TASK_PRIORITY priority ,
+                 void (*task)(INT8U, INT8U, TASK_EVENT, INT8U))
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   INT8U id = task_new_id();
   task_pool[id].condition = TC_IDLE;
@@ -93,18 +108,27 @@ INT8U task_start(char *name,
 }
 
 void task_stop(INT8U task_id)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   if( task_id < TASK_POOL_MAX )
     task_pool[task_id].condition = TC_STOPPED;
 }
 
 void task_resume(INT8U task_id)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   if( task_id < TASK_POOL_MAX )
     task_pool[task_id].condition = TC_IDLE;
 }
 
 void scheduler_init()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   for( INT8U i = 0; i < TASK_POOL_MAX; i++ )
   {
@@ -123,29 +147,43 @@ void scheduler_init()
 }
 
 void task_wait(INT16U millisec)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   current_task->timer = millisec;
   current_task->condition = TC_WAIT;
 }
 
 void task_set_state(INT8U state)
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   current_task->state = state;
 }
 
 void task_event( INT8U event )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   current_task->event = event;
 }
 
 void task_clear_event()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   current_task->event = TE_NOEVENT;
 }
 
 
-// TODO: This function should not be located here
 void task_status( FILE file_handler )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   gfprintf(file_handler, "\r\nProcess status\r\n\r\n");
 
@@ -183,17 +221,17 @@ void task_status( FILE file_handler )
           break;
       }
       switch (task_pool[i].priority)
-           {
-             case TP_LOW:
-               gfprintf(file_handler, "\x1B[32mLOW      \x1B[0m");
-               break;
-             case TP_MEDIUM:
-               gfprintf(file_handler, "\x1B[33mMEDIUM   \x1B[0m");
-               break;
-             case TP_HIGH:
-               gfprintf(file_handler, "\x1B[31mHIGH     \x1B[0m");
-               break;
-           }
+      {
+        case TP_LOW:
+          gfprintf(file_handler, "\x1B[32mLOW      \x1B[0m");
+          break;
+        case TP_MEDIUM:
+          gfprintf(file_handler, "\x1B[33mMEDIUM   \x1B[0m");
+          break;
+        case TP_HIGH:
+          gfprintf(file_handler, "\x1B[31mHIGH     \x1B[0m");
+          break;
+      }
       gfprintf(file_handler, "%5d ", task_pool[i].state);
       gfprintf(file_handler, "%s", task_pool[i].name);
       gfprintf(file_handler, "\r\n");
@@ -203,6 +241,9 @@ void task_status( FILE file_handler )
 }
 
 void scheduler()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   while(1)
   {

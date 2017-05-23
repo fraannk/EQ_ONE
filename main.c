@@ -1,20 +1,19 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded Programming (EMP)
-*
-* MODULENAME.: main.c
-*
-* PROJECT....: EQ_ONE
-*
-* DESCRIPTION: Default main module for EQ_ONE
-*
-* Change Log:
-*****************************************************************************
-* Date    Id    Change
-* --------------------
-* 29. mar. 2017  jorn    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: main.c
+ *
+ * PROJECT....: EQ_ONE
+ *
+ * DESCRIPTION: Main module for EQ_ONE
+ *
+ * Change Log:
+ *****************************************************************************
+ * Date    Id    Change
+ * --------------------
+ * 29. mar. 2017  jorn    Module created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include <stdint.h>
@@ -44,10 +43,10 @@ extern INT8U display_profile_task_id;
 
 void status( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 /*****************************************************************************
-*   Input    : Task parameter block
-*   Output   : -
-*   Function : Status LED task. 250ms toggle os the status led.
-******************************************************************************/
+ *   Input    : Task parameter block
+ *   Output   : -
+ *   Function : Status LED task. 250ms toggle os the status led.
+ ******************************************************************************/
 {
   emp_toggle_status_led();
   task_set_state( state ? 0 : 1 );
@@ -56,10 +55,10 @@ void status( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
 
 int main( void )
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Default main entry point
-******************************************************************************/
+ *   Input    : -
+ *   Output   : -
+ *   Function : Default main entry point
+ ******************************************************************************/
 {
   // Initialize hardware with SAMPLE_RATE defined in global.h
   hardware_init( SAMPLE_RATE );
@@ -70,8 +69,8 @@ int main( void )
   // Initialize UART driver
   uart0_init(UART_BAUDRATE, UART_DATABITS, UART_STOPBITS, UART_PARITY);
 
-  // Default EMP setup - turn of leds
-  emp_set_led(0);
+  // Default EMP setup - turn of LEDS
+  emp_clear_all_led();
 
   // Initialize file system
   files_init();
@@ -94,7 +93,6 @@ int main( void )
   // Stop one of the two display tasks
   task_stop(display_profile_task_id);
 
-
   task_start("LCD", TP_HIGH, lcd_buffer_task);
 
   // start the scheduler
@@ -102,5 +100,17 @@ int main( void )
 
   return(0);
 }
+
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : -
+ ******************************************************************************/
+
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
+
+
 
 /****************************** End Of Module *******************************/

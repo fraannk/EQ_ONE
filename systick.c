@@ -1,19 +1,19 @@
 /*****************************************************************************
-* University of Southern Denmark
-*
-* MODULENAME.: systick.c
-*
-* PROJECT....: EQ_ONE
-*
-* DESCRIPTION: Scheduler module for the EQ_ONE system
-*
-* Change Log:
-*****************************************************************************
-* Date    Id    Change
-* --------------------
-* 16. apr. 2017  jorn    Module adopted from MOH systick
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: systick.c
+ *
+ * PROJECT....: EQ_ONE
+ *
+ * DESCRIPTION: sysTick module for the EQ_ONE system
+ *
+ * Change Log:
+ *****************************************************************************
+ * Date    Id    Change
+ * --------------------
+ * 16. apr. 2017  jorn    Module adopted from MOH systick
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include <stdint.h>
@@ -41,18 +41,27 @@ void systick_handler()
 }
 
 void enable_global_int()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   // enable interrupts.
   __asm("cpsie i");
 }
 
 void disable_global_int()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   // disable interrupts.
   __asm("cpsid i");
 }
 
 INT32U systick_touch()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   INT32U return_time;
   static INT32U last_touch = 0;              // store last systick touch
@@ -66,6 +75,9 @@ INT32U systick_touch()
 }
 
 void systick_init( )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   INT32U systick_reload_value = SYSTICK_RELOAD_VALUE;
 
@@ -83,7 +95,8 @@ void systick_init( )
 
   // Set systick priority to 0x10, first clear then set.
   NVIC_SYS_PRI3_R &= ~(NVIC_SYS_PRI3_TICK_M);
-  NVIC_SYS_PRI3_R |= (NVIC_SYS_PRI3_TICK_M & (SYSTICK_PRIORITY<<NVIC_SYS_PRI3_TICK_S));
+  NVIC_SYS_PRI3_R |= (NVIC_SYS_PRI3_TICK_M &
+      (SYSTICK_PRIORITY<<NVIC_SYS_PRI3_TICK_S));
 
   // Select systick clock source, Use core clock
   NVIC_ST_CTRL_R |= NVIC_ST_CTRL_CLK_SRC;

@@ -1,20 +1,19 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded Programming (EMP)
-*
-* MODULENAME.: shell.c
-*
-* PROJECT....: EQ_ONE
-*
-* DESCRIPTION: 
-*
-* Change Log:
-*****************************************************************************
-* Date    Id    Change
-* --------------------
-* 18. apr. 2017  jorn    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: shell.c
+ *
+ * PROJECT....: EQ_ONE
+ *
+ * DESCRIPTION: Shell module
+ *
+ * Change Log:
+ *****************************************************************************
+ * Date    Id    Change
+ * --------------------
+ * 18. apr. 2017  jorn    Module created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include "shell.h"
@@ -47,6 +46,11 @@ extern INT8U display_profile_task_id;
 
 /*****************************   Functions   *******************************/
 char *get_cmd(char *cmd_line)
+/*****************************************************************************
+ *   Input    : Pointer to command line string
+ *   Output   : Pointer to command string
+ *   Function : Returns the string from beginning to first 0x20 (space)
+ ******************************************************************************/
 {
   INT8U index = 0;
   const char *seperator = "\x20";
@@ -65,12 +69,20 @@ char *get_cmd(char *cmd_line)
 }
 
 BOOLEAN cmd_compare(char *cmd, char *str)
+/*****************************************************************************
+ *   Input    : Pointer to command, pointer to compare string
+ *   Output   : TRUE / FALSE
+ *   Function : Compares two strings
+ ******************************************************************************/
 {
   return( strcmp( cmd, str) == 0 ? 1 : 0 );
 }
 
 
 void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   static char cmd_line[127];
   static INT8U cmd_index = 0;
@@ -181,15 +193,15 @@ void shell( INT8U id, INT8U state, TASK_EVENT event, INT8U data )
                 profile_use(12);
               else if( cmd_compare(cmd, "help") )
               {
-                gfprintf(COM1, "\r\nCommands : exit, eq, ps");
+                gfprintf(COM1, "\r\nCommands : exit, eq, ps, pN (Profile N)");
               }
               else
                 gfprintf(COM1, "\r\nUnknown command : %s\r\n", cmd_line);
             }
-              task_set_state(IDLE);
-              cmd_line[0] = 0;
-              cmd_index = 0;
-              gfprintf(COM1, "\r\n>>");
+            task_set_state(IDLE);
+            cmd_line[0] = 0;
+            cmd_index = 0;
+            gfprintf(COM1, "\r\n>>");
           }
           break;
         default:

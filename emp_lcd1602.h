@@ -1,21 +1,20 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded C Programming (ECP)
-*
-* MODULENAME.: emp_lcd1602.h
-*
-* PROJECT....: EMP
-*
-* DESCRIPTION: EMP Lcd library
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 170210  JJA   Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: emp_lcd1602.c
+ *
+ * PROJECT....: EMP
+ *
+ * DESCRIPTION: LCD driver module
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 170210  JJA   Module created.
+ *
+ *****************************************************************************/
 
 #ifndef EMP_LCD1602_
 #define EMP_LCD1602_
@@ -33,18 +32,46 @@
 
 /*****************************   Functions   *******************************/
 void lcd_init();
-void lcd_direct_write_line(char *line);
-void lcd_direct_write_data(INT8U byte);
-void lcd_direct_set_cursor(INT8U x, INT8U y);
-void lcd_direct_write_buffer(INT8U *buffer);
-void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Initializes the LCD module
+ ******************************************************************************/
+
 void lcd_set_cursor(INT8U x, INT8U y);
+/*****************************************************************************
+ *   Input    : X, Y coordinates
+ *   Output   : -
+ *   Function : Set cursor on LCD (Buffered)
+ ******************************************************************************/
+
 void lcd_clear();
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Clears the LCD (Buffered)
+ ******************************************************************************/
+
 void lcd_write(char *str);
+/*****************************************************************************
+ *   Input    : line containing pointer to char
+ *   Output   : -
+ *   Function : Write a line (string) directly to LCD
+ ******************************************************************************/
+
 void lcd_write_char(char ch);
-void lcd_set_custom_font();
-void lcd_set_custom_font_eq();
-void lcd_set_custom_font2_eq();
+/*****************************************************************************
+ *   Input    : Char to be written
+ *   Output   : -
+ *   Function : Write char to LCD (buffered)
+ ******************************************************************************/
+
+void lcd_buffer_task( INT8U id, INT8U state, TASK_EVENT event, INT8U data );
+/*****************************************************************************
+ *   Input    : Task parameter block
+ *   Output   : -
+ *   Function : LCD taskto update the LCD buffer to display, 1 char per tick
+ ******************************************************************************/
 
 
 /****************************** End Of Module *******************************/

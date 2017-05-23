@@ -1,37 +1,37 @@
 /*****************************************************************************
-* University of Southern Denmark
-*
-* MODULENAME.: hardware.c
-*
-* PROJECT....: EQ_ONE
-*
-* DESCRIPTION: Hardware module for EQ_ONE project
-*              Project Mode
-*                Left-in    PB5 (AIN11)   ADC0
-*                Right-in   PB4 (AIN10)   ADC0
-*
-*                PWM Mode
-*                Left-out   PB7 (M0PWM1)  PWM module 0 PWM generator 0
-*                Right-out  PB6 (M0PWM0)  PWM module 0 PWM generator 0
-*
-*                DAC Mode
-*                PA2  (SCK)
-*                PA3  (CS)
-*                PA5  (SDA)
-*                PE1  (LDAC)    // Todo:Not yet implemented
-*                PE2  (SHDN)    // Todo:Not yet implemented
-*
-*              EMP Mode (with #define EMP) for on board audio circuit
-*                in         PE5 (AIN8)    ADC0
-*                out        PE4 (M0PWM4)  PWM module 0 PWM generator 2
-*
-* Change Log:
-*****************************************************************************
-* Date    Id    Change
-* --------------------
-* 29. mar. 2017  jorn    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: hardware.c
+ *
+ * PROJECT....: EQ_ONE
+ *
+ * DESCRIPTION: Hardware module for EQ_ONE project
+ *              Project Mode
+ *                Left-in    PB5 (AIN11)   ADC0
+ *                Right-in   PB4 (AIN10)   ADC0
+ *
+ *                PWM Mode
+ *                Left-out   PB7 (M0PWM1)  PWM module 0 PWM generator 0
+ *                Right-out  PB6 (M0PWM0)  PWM module 0 PWM generator 0
+ *
+ *                DAC Mode
+ *                PA2  (SCK)
+ *                PA3  (CS)
+ *                PA5  (SDA)
+ *                PE1  (LDAC)    // Todo:Not yet implemented
+ *                PE2  (SHDN)    // Todo:Not yet implemented
+ *
+ *              EMP Mode (with #define EMP) for on board audio circuit
+ *                in         PE5 (AIN8)    ADC0
+ *                out        PE4 (M0PWM4)  PWM module 0 PWM generator 2
+ *
+ * Change Log:
+ *****************************************************************************
+ * Date    Id    Change
+ * --------------------
+ * 29. mar. 2017  jorn    Module created.
+ *
+ *****************************************************************************/
 
 /***************************** Include files *******************************/
 #include "hardware.h"
@@ -53,8 +53,8 @@ FP32    adc_pwm_ratio = 1;
 /*****************************   Functions   *******************************/
 void pwm_clear_interrupt()
 /*****************************************************************************
-*   Header description
-******************************************************************************/
+ *   Header description
+ ******************************************************************************/
 {
 #ifdef EMP
   // Clear interrupt flags
@@ -69,8 +69,8 @@ void pwm_clear_interrupt()
 
 void line_in( enum io_state state )
 /*****************************************************************************
-*   Header description
-******************************************************************************/
+ *   Header description
+ ******************************************************************************/
 {
   switch( state )
   {
@@ -91,8 +91,8 @@ void line_in( enum io_state state )
 
 void line_out( enum io_state state )
 /*****************************************************************************
-*   Header description
-******************************************************************************/
+ *   Header description
+ ******************************************************************************/
 {
   switch( state )
   {
@@ -121,8 +121,8 @@ void line_out( enum io_state state )
 
 void audio_out(sample_type sample)
 /*****************************************************************************
-*   Header description
-******************************************************************************/
+ *   Header description
+ ******************************************************************************/
 {
   if(cycles)
   {
@@ -160,8 +160,8 @@ void audio_out(sample_type sample)
 
 void audio_in(sample_type *sample)
 /*****************************************************************************
-*   Header description
-******************************************************************************/
+ *   Header description
+ ******************************************************************************/
 {
 #ifdef EMP
   INT16U value;
@@ -205,10 +205,10 @@ void audio_in(sample_type *sample)
 
 void init_ADC( )
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Initialize the ADC
-******************************************************************************/
+ *   Input    : -
+ *   Output   : -
+ *   Function : Initialize the ADC
+ ******************************************************************************/
 {
   // EMP board is controled by define EMP in the define section
   //  ANALOG_IN mono  -> PE5 (AIN8) on the EMP Board
@@ -301,10 +301,10 @@ void init_ADC( )
 
 void set_80Mhz_clock()
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Set the processor frequency to 80Mhz
-******************************************************************************/
+ *   Input    : -
+ *   Output   : -
+ *   Function : Set the processor frequency to 80Mhz
+ ******************************************************************************/
 {
   INT32U reg;
 
@@ -351,11 +351,11 @@ void set_80Mhz_clock()
 
 void init_PWM( INT16U cycles )
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Initialize the PWM as audio output based on the cycles
-*              between each sample.
-******************************************************************************/
+ *   Input    : Cycles matching the samplings frequency
+ *   Output   : -
+ *   Function : Initialize the PWM as audio output based on the cycles
+ *              between each sample.
+ ******************************************************************************/
 {
 #ifdef EMP
   // PB2 (T3CCP0)
@@ -429,7 +429,7 @@ void init_PWM( INT16U cycles )
 
   TIMER3_ICR_R |= TIMER_ICR_CAECINT;
 
-  */
+   */
 
   // PE4 (M0PWM4)
 
@@ -499,85 +499,85 @@ void init_PWM( INT16U cycles )
 
   // PB6 (M0PWM0)  & PB7 (M0PWM1)
 
-   INT32U reg;
+  INT32U reg;
 
-   // Activate PORTB Clock
-   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R1;
+  // Activate PORTB Clock
+  SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R1;
 
-   // Digital enable pins
-   GPIO_PORTB_DEN_R |= (1<<6 | 1<<7);
+  // Digital enable pins
+  GPIO_PORTB_DEN_R |= (1<<6 | 1<<7);
 
-   // Direction
-   GPIO_PORTB_DIR_R |= (1<<6 | 1<<7);
+  // Direction
+  GPIO_PORTB_DIR_R |= (1<<6 | 1<<7);
 
-   // Enable the alternate function on PB6 & PB7, high==AFSEL
-   GPIO_PORTB_AFSEL_R |= (1<<6 | 1<<7);
+  // Enable the alternate function on PB6 & PB7, high==AFSEL
+  GPIO_PORTB_AFSEL_R |= (1<<6 | 1<<7);
 
-   // GPIO portcontrol, activate M0PWM0 on PB6 & M0PWM1 on PB7
-   reg = GPIO_PORTB_PCTL_R;
-   reg &= 0xFF000000;                                // Clear bits 31:24
-   GPIO_PORTB_PCTL_R |= GPIO_PCTL_PB7_M0PWM1
-                        | GPIO_PCTL_PB6_M0PWM0;      // Set
+  // GPIO portcontrol, activate M0PWM0 on PB6 & M0PWM1 on PB7
+  reg = GPIO_PORTB_PCTL_R;
+  reg &= 0xFF000000;                                // Clear bits 31:24
+  GPIO_PORTB_PCTL_R |= GPIO_PCTL_PB7_M0PWM1
+      | GPIO_PCTL_PB6_M0PWM0;      // Set
 
-   // Activate PWM0 clock
-   SYSCTL_RCGCPWM_R |= SYSCTL_RCGCPWM_R0;
+  // Activate PWM0 clock
+  SYSCTL_RCGCPWM_R |= SYSCTL_RCGCPWM_R0;
 
-   // Set PWM divide on the RCC to disabled
-   bit_clear( SYSCTL_RCC_R, SYSCTL_RCC_USEPWMDIV);
+  // Set PWM divide on the RCC to disabled
+  bit_clear( SYSCTL_RCC_R, SYSCTL_RCC_USEPWMDIV);
 
-   // Disable PWM block
-   bit_clear( PWM0_0_CTL_R, PWM_0_CTL_ENABLE );
+  // Disable PWM block
+  bit_clear( PWM0_0_CTL_R, PWM_0_CTL_ENABLE );
 
-   // Disable PWM0:PWM0-PWM1
-   bit_clear( PWM0_ENABLE_R, PWM_ENABLE_PWM0EN );
-   bit_clear( PWM0_ENABLE_R, PWM_ENABLE_PWM1EN );
+  // Disable PWM0:PWM0-PWM1
+  bit_clear( PWM0_ENABLE_R, PWM_ENABLE_PWM0EN );
+  bit_clear( PWM0_ENABLE_R, PWM_ENABLE_PWM1EN );
 
-   // Set PWM Count-up/Count-down mode
-   bit_set( PWM0_0_CTL_R, PWM_0_CTL_MODE );
-   bit_set( PWM0_0_CTL_R, PWM_0_CTL_DEBUG);
+  // Set PWM Count-up/Count-down mode
+  bit_set( PWM0_0_CTL_R, PWM_0_CTL_MODE );
+  bit_set( PWM0_0_CTL_R, PWM_0_CTL_DEBUG);
 
-   // set PWM0 Generator A control
-   // Comp A down -> Drive pwmA Low
-   // Comp A up   -> Drive pwmA High
-   bit_set( PWM0_0_GENA_R, (PWM_0_GENA_ACTCMPAD_ZERO | PWM_0_GENA_ACTCMPAU_ONE) );
+  // set PWM0 Generator A control
+  // Comp A down -> Drive pwmA Low
+  // Comp A up   -> Drive pwmA High
+  bit_set( PWM0_0_GENA_R, (PWM_0_GENA_ACTCMPAD_ZERO | PWM_0_GENA_ACTCMPAU_ONE) );
 
-   // set PWM0 Generator B control
-   // Comp A down -> Drive pwmB Low
-   // Comp A up   -> Drive pwmB High
-   bit_set( PWM0_0_GENB_R, (PWM_0_GENB_ACTCMPBD_ZERO | PWM_0_GENB_ACTCMPBU_ONE) );
+  // set PWM0 Generator B control
+  // Comp A down -> Drive pwmB Low
+  // Comp A up   -> Drive pwmB High
+  bit_set( PWM0_0_GENB_R, (PWM_0_GENB_ACTCMPBD_ZERO | PWM_0_GENB_ACTCMPBU_ONE) );
 
-   // set the PWM0 load
-   PWM0_0_LOAD_R = (INT16U)(cycles>>1);
+  // set the PWM0 load
+  PWM0_0_LOAD_R = (INT16U)(cycles>>1);
 
-   // invert M0PWM1 and M0PWM0 signals
-   //bit_set( PWM0_INVERT_R, 0b11 );
+  // invert M0PWM1 and M0PWM0 signals
+  //bit_set( PWM0_INVERT_R, 0b11 );
 
-   // set initial CompA and CompB values
-   PWM0_0_CMPA_R = 0;
-   PWM0_0_CMPB_R = 0;
+  // set initial CompA and CompB values
+  PWM0_0_CMPA_R = 0;
+  PWM0_0_CMPB_R = 0;
 
-   // Enable PWM0 interrupt  26
-   NVIC_EN0_R |= 1<<10;
+  // Enable PWM0 interrupt  26
+  NVIC_EN0_R |= 1<<10;
 
-   // enable interrupt on PWM0
-   bit_set( PWM0_INTEN_R, 0b0001 );
+  // enable interrupt on PWM0
+  bit_set( PWM0_INTEN_R, 0b0001 );
 
-   // enable interrupt for PWM0 when counter is zero
-   bit_set( PWM0_0_INTEN_R, PWM_0_INTEN_INTCNTZERO);
+  // enable interrupt for PWM0 when counter is zero
+  bit_set( PWM0_0_INTEN_R, PWM_0_INTEN_INTCNTZERO);
 
-   // Enable PWM block
-   bit_set( PWM0_0_CTL_R, PWM_0_CTL_ENABLE );
+  // Enable PWM block
+  bit_set( PWM0_0_CTL_R, PWM_0_CTL_ENABLE );
 
-   #endif
+#endif
 
 }
 
 void init_tiva_board()
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : INitialize the Tiva board
-******************************************************************************/
+ *   Input    : -
+ *   Output   : -
+ *   Function : Initialize the Tiva board
+ ******************************************************************************/
 {
   // Set GPIO'S on Run Mode Clock Gating Control Register on PORTF & PORTD
   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R5|  SYSCTL_RCGCGPIO_R3;
@@ -598,10 +598,10 @@ void init_tiva_board()
 
 INT16U cycles_per_sample ( INT16U sample_freq )
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Calculates the sample interval in CPU cycles on a 80Mhz system
-******************************************************************************/
+ *   Input    : Sample frequency in Hz
+ *   Output   : Clock cycles per sample
+ *   Function : Calculates the sample interval in CPU cycles on a 80Mhz system
+ ******************************************************************************/
 {
   INT16U cycles = CPU_F / sample_freq;
   return cycles;
@@ -609,10 +609,10 @@ INT16U cycles_per_sample ( INT16U sample_freq )
 
 void enable_FPU()
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Enable the floating point unit (FPU)
-******************************************************************************/
+ *   Input    : -
+ *   Output   : -
+ *   Function : Enable the floating point unit (FPU)
+ ******************************************************************************/
 {
   INT32U reg;
 
@@ -626,10 +626,10 @@ void enable_FPU()
 
 void init_debug_pins()
 /*****************************************************************************
-*   Input    : -
-*   Output   : -
-*   Function : Initialize the debug pins PB0, PB1 and PB3
-******************************************************************************/
+ *   Input    : -
+ *   Output   : -
+ *   Function : Initialize the debug pins PB0, PB1 and PB3
+ ******************************************************************************/
 {
   // Activate PORTB Clock
   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R1;
@@ -643,8 +643,8 @@ void init_debug_pins()
 
 void delay_us(INT32U time)
 /*****************************************************************************
-*   Header description
-******************************************************************************/
+ *   Header description
+ ******************************************************************************/
 {
   //Make sure Timer2A is stopped
   bit_clear(TIMER2_CTL_R, TIMER_CTL_TAEN);
@@ -665,23 +665,29 @@ void delay_us(INT32U time)
 
 void delay_init()
 /*****************************************************************************
-*   Header description
-******************************************************************************/
-{
-    // Activate Timer2 Clock
-    SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R2;
+ *   Input    : -
+ *   Output   : -
+ *   Function : Initialize the the microsecond delay
+ ******************************************************************************/{
+  // Activate Timer2 Clock
+  SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R2;
 
-    // Disable timer2 A before changing any value
-    bit_clear(TIMER2_CTL_R, TIMER_CTL_TAEN);
+  // Disable timer2 A before changing any value
+  bit_clear(TIMER2_CTL_R, TIMER_CTL_TAEN);
 
-    // 32-bit timer for Timer2 A.
-    TIMER2_CFG_R = 0x00;
+  // 32-bit timer for Timer2 A.
+  TIMER2_CFG_R = 0x00;
 
-    // One-Shot Timer mode on Timer2 A
-    TIMER2_TAMR_R = 0x01;
+  // One-Shot Timer mode on Timer2 A
+  TIMER2_TAMR_R = 0x01;
 }
 
 void timer_init()
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Initialize the timer for timer function
+ ******************************************************************************/
 {
   // Activate Timer4 Clock
   SYSCTL_RCGCTIMER_R |= SYSCTL_RCGCTIMER_R4;
@@ -702,12 +708,18 @@ void timer_init()
 }
 
 void timer_set(INT32U time )
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   TIMER4_TAV_R = time;
 
 }
 
 INT32U timer_get()
+/*****************************************************************************
+ *   Header description
+ ******************************************************************************/
 {
   return (TIMER4_TAR_R);
 }
@@ -737,11 +749,11 @@ void spi_init()
   INT32U reg = GPIO_PORTA_PCTL_R;
   reg &= 0x00FFFF00;                             // Clear bits
   GPIO_PORTA_PCTL_R |= GPIO_PCTL_PA2_SSI0CLK
-                    | GPIO_PCTL_PA3_SSI0FSS
-                    | GPIO_PCTL_PA4_SSI0RX
-                    | GPIO_PCTL_PA5_SSI0TX;      // Set bits
+      | GPIO_PCTL_PA3_SSI0FSS
+      | GPIO_PCTL_PA4_SSI0RX
+      | GPIO_PCTL_PA5_SSI0TX;      // Set bits
 
-  // SSI 0 master mode and disable SSI
+      // SSI 0 master mode and disable SSI
   SSI0_CR1_R = 0;
 
   // Configure the SSI clock source (SSICC)
@@ -751,7 +763,7 @@ void spi_init()
   // SSInClk = SysClk / (CPSDVSR * (1 + SCR))
   // SSInClk = 10Mhz
   SSI0_CPSR_R = 10;       // CPSDVSR
-                          // SCR is deafult 0
+  // SCR is deafult 0
 
   // Write the SSICR0 register with
   // Serial clock rate (SCR)
@@ -771,8 +783,8 @@ void spi_init()
 
 void hardware_init( INT16U sample_freq )
 /*****************************************************************************
-*   Header description
-******************************************************************************/
+ *   Header description
+ ******************************************************************************/
 {
   // disable global interrupt
   disable_global_int();
@@ -793,11 +805,11 @@ void hardware_init( INT16U sample_freq )
   cycles = cycles_per_sample( sample_freq );
 
   //
-  #ifdef EMP
-    adc_pwm_ratio = (FP32)cycles/4096;
-  #else
-    adc_pwm_ratio = (FP32)cycles/8192;
-  #endif
+#ifdef EMP
+  adc_pwm_ratio = (FP32)cycles/4096;
+#else
+  adc_pwm_ratio = (FP32)cycles/8192;
+#endif
 
   init_ADC();
 

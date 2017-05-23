@@ -1,24 +1,24 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded Programming (EMP)
-*
-* MODULENAME.: emp_type.h
-*
-* PROJECT....: EMP
-*
-* DESCRIPTION: Definements of variable types.
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 050128  KA    Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ * Embedded Programming (EMP)
+ *
+ * MODULENAME.: emp_type.h
+ *
+ * PROJECT....: EMP
+ *
+ * DESCRIPTION: Definements of variable types.
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 050128  KA    Module created.
+ * 170410  JJ    Module adopted for EQ-ONE project according to codestadard
+ *****************************************************************************/
 
 #ifndef _EMP_TYPE_H
-  #define _EMP_TYPE_H
+#define _EMP_TYPE_H
 
 /***************************** Include files *******************************/
 

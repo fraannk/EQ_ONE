@@ -1,21 +1,20 @@
 /*****************************************************************************
-* University of Southern Denmark
-* Embedded C Programming (ECP)
-*
-* MODULENAME.: emp_board.h
-*
-* PROJECT....: EMP
-*
-* DESCRIPTION: Generel EMP files
-*
-* Change Log:
-******************************************************************************
-* Date    Id    Change
-* YYMMDD
-* --------------------
-* 170210  JJA   Module created.
-*
-*****************************************************************************/
+ * University of Southern Denmark
+ *
+ * MODULENAME.: emp_board.c
+ *
+ * PROJECT....: EMP
+ *
+ * DESCRIPTION: Module to handle EMP functions
+ *
+ * Change Log:
+ ******************************************************************************
+ * Date    Id    Change
+ * YYMMDD
+ * --------------------
+ * 170210  JJA   Module created.
+ *
+ *****************************************************************************/
 
 #ifndef EMP_BOARD_
 #define EMP_BOARD_
@@ -34,31 +33,31 @@
 /*****************************   Functions   *******************************/
 void emp_set_led(INT8U led);
 /*****************************************************************************
-*   Input    : INT8U : LED_RED | LED_YELLOW | LED_GREEN
-*   Output   : void
-*   Function : Set the selected LED combination on the EMP board
-******************************************************************************/
+ *   Input    : INT8U : LED_RED | LED_YELLOW | LED_GREEN
+ *   Output   : void
+ *   Function : Set the selected LED combination on the EMP board
+ ******************************************************************************/
 
 void emp_toggle_status_led();
 /*****************************************************************************
-*   Input    : -
-*   Output   : void
-*   Function : Toggle the EMP board status LED
-******************************************************************************/
+ *   Input    : -
+ *   Output   : void
+ *   Function : Toggle the EMP board status LED
+ ******************************************************************************/
 
 void emp_clear_all_led(void);
 /*****************************************************************************
-*   Input    : void
-*   Output   : void
-*   Function : Clears all LEDs on the EMP board
-******************************************************************************/
+ *   Input    : void
+ *   Output   : void
+ *   Function : Clears all LEDs on the EMP board
+ ******************************************************************************/
 
 void emp_toggle_led(INT8U led);
 /*****************************************************************************
-*   Input    : INT8U : LED_RED | LED_YELLOW | LED_GREEN
-*   Output   : void
-*   Function : Toggle the selected LED combination on the EMP board
-******************************************************************************/
+ *   Input    : INT8U : LED_RED | LED_YELLOW | LED_GREEN
+ *   Output   : void
+ *   Function : Toggle the selected LED combination on the EMP board
+ ******************************************************************************/
 
 
 /****************************** End Of Module *******************************/
