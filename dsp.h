@@ -1,13 +1,12 @@
 
 /*****************************************************************************
 * University of Southern Denmark
-* Embedded Programming (EMP)
 *
 * MODULENAME.: dsp.h
 *
 * PROJECT....: EQ_ONE
 *
-* DESCRIPTION:
+* DESCRIPTION: DSP calculation API module
 *
 * Change Log:
 ******************************************************************************
@@ -31,8 +30,9 @@ typedef enum {
   iir_notch   = 2,
   iir_ls      = 3,
   iir_hs      = 4
-}iir_filter_type;
+}iir_filter_type;       // Filter types defined as Enum
 
+// Filter types
 #define IIR_NONE        0
 #define IIR_PEAK        1
 #define IIR_NOTCH       2
@@ -44,8 +44,6 @@ typedef struct coef{
   FP32 a[3];          // a coefficients of a biquad
   FP32 b[3];          // b coefficients of a biquad
 }coef_t;
-
-
 
 
 /*****************************   Constants   *******************************/
@@ -68,7 +66,7 @@ coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth);
 
 BOOLEAN iir_filter_clear(void);
 /*****************************************************************************
-*   Input    : none
+*   Input    : -
 *   Output   : true if clear succeeded
 *   Function : clears temp coefficient matrix,
 ******************************************************************************/
@@ -82,8 +80,8 @@ BOOLEAN iir_filter_add(coef_t coef);
 
 void iir_filter_use();
 /*****************************************************************************
-*   Input    : none
-*   Output   : none
+*   Input    : -
+*   Output   : -
 *   Function : transfers coefficient matrix to active coefficients
 ******************************************************************************/
 
@@ -104,7 +102,7 @@ FP32 dsp_filter_amplitude(INT16U frequency);
 void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size);
 /*****************************************************************************
 *   Input    : frequency array, number of elements in array
-*   Output   : none
+*   Output   : -
 *   Function : calculates logarithmic divided frequency array from 20Hz to 20kHz
 ******************************************************************************/
 
