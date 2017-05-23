@@ -41,8 +41,8 @@ typedef enum {
 
 /********************** External declaration of Variables ******************/
 typedef struct coef{
-  FP32 a[3];
-  FP32 b[3];
+  FP32 a[3];          // a coefficients of a biquad
+  FP32 b[3];          // b coefficients of a biquad
 }coef_t;
 
 
@@ -51,29 +51,6 @@ typedef struct coef{
 /*****************************   Constants   *******************************/
 
 /*************************  Function interfaces ****************************/
-// TODO: add comments
-void dsp_mode_float();
-void dsp_mode_integer();
-void dsp_mode_fixed();
-
-
-FP32 dsp_filter_amplitude(INT16U frequency);
-void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size);
-
-void iir_init_dsp_states(void);
-/*****************************************************************************
-*   Input    : none
-*   Output   : none
-*   Function : initialize dsp module
-******************************************************************************/
-
-
-FP32 iir_filter_sos(FP32 in,FP32 *a,FP32 *b,FP32 *states_sos);
-/*****************************************************************************
-*   Input    : Input sample
-*   Output   : filtered sample
-*   Function : filters input sample with a biquad filter
-******************************************************************************/
 
 INT16U dsp_iir_filter( INT16U sample);
 /*****************************************************************************
@@ -82,36 +59,12 @@ INT16U dsp_iir_filter( INT16U sample);
 *   Function : Cascade biquads
 ******************************************************************************/
 
-
-void iir_calc_coef(FP32 *a,FP32 *b);
+coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth);
 /*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate biquad coefficients for parameter filter_type
+*   Input    : type (filter type), frequency, gain, bandwidth
+*   Output   : coefficients struct with a-,b-coefficients
+*   Function : calculates coefficients from the input arguments
 ******************************************************************************/
-
-void iir_calc_coef_peak(FP32 *a,FP32 *b);
-/*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate peak/notch coefficients
-******************************************************************************/
-
-void iir_calc_coef_hs(FP32 *a,FP32 *b);
-/*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate high shelf coefficients
-******************************************************************************/
-
-void iir_calc_coef_ls(FP32 *a,FP32 *b);
-/*****************************************************************************
-*   Input    : a coefficient, b coefficient (call by reference)
-*   Output   : none
-*   Function : calculate low shelf coefficients
-******************************************************************************/
-
-
 
 BOOLEAN iir_filter_clear(void);
 /*****************************************************************************
@@ -119,9 +72,6 @@ BOOLEAN iir_filter_clear(void);
 *   Output   : true if clear succeeded
 *   Function : clears temp coefficient matrix,
 ******************************************************************************/
-
-BOOLEAN iir_filter_master_gain( FP32 gain );
-// TODO: add comment
 
 BOOLEAN iir_filter_add(coef_t coef);
 /*****************************************************************************
@@ -137,46 +87,25 @@ void iir_filter_use();
 *   Function : transfers coefficient matrix to active coefficients
 ******************************************************************************/
 
-coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth);
+BOOLEAN iir_filter_master_gain( FP32 gain );
 /*****************************************************************************
-*   Input    : type (filter type), frequency, gain, bandwidth
-*   Output   : coefficients struct with a-,b-coefficients
-*   Function : calculates coefficients from the input arguments
+*   Input    : gain
+*   Output   : bool
+*   Function : sets master gain for equalizer
 ******************************************************************************/
 
-void iir_set_param(FP32 BW,FP32 G,FP32 f_0,INT8U filter_type);
+FP32 dsp_filter_amplitude(INT16U frequency);
 /*****************************************************************************
-*   Input    : BW (bandwidth), G (gain), f_0 (center/corner frequency), filter_type
+*   Input    : frequency
+*   Output   : amplitude
+*   Function : returns the amplitude for a frequency for the active equalizer
+******************************************************************************/
+
+void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size);
+/*****************************************************************************
+*   Input    : frequency array, number of elements in array
 *   Output   : none
-*   Function : set parameters
-******************************************************************************/
-
-void iir_get_param(FP32 *BW,FP32 *G,FP32 *f_0,INT8U *filter_type);
-/*****************************************************************************
-*   Input    : BW (bandwidth), G (gain), f_0 (center/corner frequency), filter_type
-*   Output   : none
-*   Function : returns input arguments as call by reference
-******************************************************************************/
-
-void iir_filter_enable();
-/*****************************************************************************
-*   Input    : none
-*   Output   : none
-*   Function : enable the filter in iir_cascade()
-******************************************************************************/
-
-void iir_filter_disable();
-/*****************************************************************************
-*   Input    : none
-*   Output   : none
-*   Function : disnable the filter in iir_cascade()
-******************************************************************************/
-
-BOOLEAN filter_on();
-/*****************************************************************************
-*   Input    : none
-*   Output   : returns true if filter is on
-*   Function : checks if filter (iir_cascade() ) is on
+*   Function : calculates logarithmic divided frequency array from 20Hz to 20kHz
 ******************************************************************************/
 
 #endif /* DSP_H_ */
