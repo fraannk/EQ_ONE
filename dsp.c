@@ -5,7 +5,7 @@
 *
 * PROJECT....: EQ_ONE
 *
-* DESCRIPTION:
+* DESCRIPTION: DSP calculation API module
 *
 * Change Log:
 *****************************************************************************
@@ -76,6 +76,9 @@ void dsp_mode_fixed();
 /*****************************   Functions   *******************************/
 
 FP32 dsp_filter_amplitude(INT16U frequency)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   FP32  num_real,
         num_imag,
@@ -101,6 +104,9 @@ FP32 dsp_filter_amplitude(INT16U frequency)
 }
 
 void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   FP32 log_steps,f;
   log_steps = (log10(20000.0) - log10(20.0))/((FP32)2.0*size);
@@ -117,16 +123,31 @@ void dsp_filter_log_freq(INT16U* frequency_arr,INT8U size)
 }
 
 void dsp_mode_float()
+/*****************************************************************************
+*   Input    : -
+*   Output   : -
+*   Function : Set dsp mode to float (not implemented)
+******************************************************************************/
 {
   current_dsp_mode = dm_float;
 }
 
 void dsp_mode_integer()
+/*****************************************************************************
+*   Input    : -
+*   Output   : -
+*   Function : Set dsp mode to integer (not implemented)
+******************************************************************************/
 {
   current_dsp_mode = dm_integer;
 }
 
 void dsp_mode_fixed()
+/*****************************************************************************
+*   Input    : -
+*   Output   : -
+*   Function :  Set dsp mode to fixed (not implemented)
+******************************************************************************/
 {
   current_dsp_mode = dm_fixed;
 }
@@ -170,7 +191,10 @@ FP32 iir_filter_sos(FP32 in,            /* input sample */
   return out;
 }
 
-INT16U dsp_iir_filter( INT16U sample )            /* input sample */
+INT16U dsp_iir_filter( INT16U sample )
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   // Set returning value and initialize it with the input sample value
   INT16U sample_out = sample;
@@ -214,7 +238,9 @@ void iir_calc_coef_peak(FP32 *a,FP32 *b)
 *   Function : calculate peak/notch coefficients
 ******************************************************************************/
 {
+
   FP32 G,w_0,beta,G_B,W;
+
   w_0 = 2.0*PI*parameters.frequency * ( 1.0 / SAMPLE_RATE );
   W = 2.0*PI*parameters.bandwith * ( 1.0 / SAMPLE_RATE );
   G =  powf( 10.0, ( parameters.gain /20.0 ) );
@@ -326,9 +352,10 @@ void iir_calc_coef(FP32 a[],FP32 b[])
   }
 }
 
-
-
 BOOLEAN iir_filter_clear()
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   active_band_temp = 0;
   for(INT8U i=0; i < MAX_BAND; i++)
@@ -342,6 +369,9 @@ BOOLEAN iir_filter_clear()
 }
 
 BOOLEAN iir_filter_master_gain( FP32 gain )
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   //TODO: add master gain to current dsp profile
   if(gain > 20 || gain < -20)
@@ -352,6 +382,9 @@ BOOLEAN iir_filter_master_gain( FP32 gain )
 }
 
 BOOLEAN iir_filter_add(coef_t coef)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   INT8U i;
 
@@ -367,7 +400,11 @@ BOOLEAN iir_filter_add(coef_t coef)
   active_band_temp++;
   return TRUE;
 }
+
 void iir_filter_use()
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
 
   INT8U i,j;
@@ -386,6 +423,9 @@ void iir_filter_use()
 }
 
 coef_t* iir_coef(INT8U type,FP32 frequency,FP32 gain,FP32 bandwidth)
+/*****************************************************************************
+*   Header description
+******************************************************************************/
 {
   iir_set_param(bandwidth, gain, frequency, type);
   iir_calc_coef(temp_coef.a,temp_coef.b);
@@ -401,6 +441,7 @@ void iir_filter_enable()
 {
   filter_is_on = TRUE ;
 }
+
 void iir_filter_disable()
 /*****************************************************************************
 *   Input    : none
@@ -410,6 +451,7 @@ void iir_filter_disable()
 {
   filter_is_on = FALSE;
 }
+
 BOOLEAN filter_on()
 /*****************************************************************************
 *   Input    : none
